@@ -1,10 +1,9 @@
 import { serialize } from 'cookie';
-import jwt from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { createToken } from '@/shared/lib/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 const TOKEN_NAME = 'auth-token';
-const TOKEN_MAX_AGE = 30 * 60; // 30 минут
+const TOKEN_MAX_AGE = 30 * 60;
 
 const MOCK_USERS = [
   { email: 'user@example.com', password: 'password123' },
@@ -29,11 +28,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ email }, JWT_SECRET, {
-      expiresIn: TOKEN_MAX_AGE,
-    });
-
-    const cookie = serialize(TOKEN_NAME, token, {
+    const cookie = serialize(TOKEN_NAME, createToken(email), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
