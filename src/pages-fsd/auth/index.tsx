@@ -1,12 +1,17 @@
+'use client';
+
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './styles.module.scss';
 
 export const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -16,8 +21,30 @@ export const Auth = () => {
     }
 
     setError('');
+    setIsLoading(true);
 
-    // console.log({ email, password });
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        router.push('/');
+      } else {
+        setError(data.error || 'Authentication failed');
+      }
+    } catch (error_) {
+      setError('Network error. Please try again.');
+      console.error('Login error:', error_);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -34,6 +61,7 @@ export const Auth = () => {
               placeholder="example@mail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
@@ -45,15 +73,22 @@ export const Auth = () => {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
           {error && <span className={styles.error}>{error}</span>}
 
-          <button className={styles.button} type="submit">
-            Login
+          <button className={styles.button} type="submit" disabled={isLoading}>
+            {isLoading ? 'Loading...' : 'Login'}
           </button>
         </form>
+
+        <div className={styles.hint}>
+          <p>Тестовые учетные данные:</p>
+          <p>Email: user@example.com</p>
+          <p>Password: password123</p>
+        </div>
       </div>
     </div>
   );
