@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { SyntheticEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './styles.module.scss';
 
@@ -11,7 +11,7 @@ export const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -51,7 +51,6 @@ export const Auth = () => {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>Login</h1>
-
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.field}>
             <label className={styles.label}>Email</label>
@@ -83,12 +82,7 @@ export const Auth = () => {
             {isLoading ? 'Loading...' : 'Login'}
           </button>
         </form>
-
-        <div className={styles.hint}>
-          <p>Тестовые учетные данные:</p>
-          <p>Email: user@example.com</p>
-          <p>Password: password123</p>
-        </div>
+        Email: user@example.com Password: password123
       </div>
     </div>
   );

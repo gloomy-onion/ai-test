@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { HydrationBoundary, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import { TANSTCK_CLIENT_OPTIONS } from '@/shared/lib/config';
 
