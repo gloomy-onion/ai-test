@@ -1,16 +1,10 @@
+import bcrypt from 'bcryptjs';
 import { serialize } from 'cookie';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createToken } from '@/shared/lib/auth';
+import { createToken, TOKEN_MAX_AGE, TOKEN_NAME } from '@/shared/lib';
+import { MOCK_USERS } from './lib';
 
-const TOKEN_NAME = 'auth-token';
-const TOKEN_MAX_AGE = 30 * 60;
-
-const MOCK_USERS = [
-  { email: 'user@example.com', password: 'password123' },
-  { email: 'admin@example.com', password: 'admin123' },
-];
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -22,9 +16,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = MOCK_USERS.find((u) => u.email === email && u.password === password);
+    const user = MOCK_USERS.find((u) => u.email === email);
 
     if (!user) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (!isPasswordValid) {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
