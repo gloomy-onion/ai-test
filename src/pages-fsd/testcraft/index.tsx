@@ -14,6 +14,10 @@ import { WorkspaceScreen } from './components/screens/workspace';
 import { Sidebar } from './components/sidebar';
 import styles from './styles.module.scss';
 
+interface TestCraftPageProps {
+  authUser: string;
+}
+
 type ScreenName =
   | 'dashboard'
   | 'tasks'
@@ -33,7 +37,7 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   settings: ['Настройки API', 'Провайдер и ключ для проверки заданий'],
 };
 
-export const TestCraftPage = () => {
+export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('dashboard');
   const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -73,6 +77,11 @@ export const TestCraftPage = () => {
     setCurrentScreen('tasks');
   }, []);
 
+  const handleLogout = useCallback(async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/auth';
+  }, []);
+
   const [title, subtitle] =
     currentScreen === 'workspace' ? ['', ''] : SCREEN_TITLES[currentScreen] || ['', ''];
 
@@ -81,8 +90,10 @@ export const TestCraftPage = () => {
       <Sidebar
         currentScreen={currentScreen}
         history={history}
+        authUser={authUser}
         onNavigate={handleNavigate}
         onFilterTasks={handleFilterTasks}
+        onLogout={handleLogout}
       />
 
       <div className={styles.main}>

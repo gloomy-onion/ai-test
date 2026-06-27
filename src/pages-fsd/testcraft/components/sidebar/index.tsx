@@ -7,8 +7,10 @@ import styles from './styles.module.scss';
 interface SidebarProps {
   currentScreen: string;
   history: HistoryEntry[];
+  authUser: string;
   onNavigate: (screen: string) => void;
   onFilterTasks: (type: string) => void;
+  onLogout: () => void;
 }
 
 const NAV_ITEMS = [
@@ -27,7 +29,18 @@ const FILTER_ITEMS = [
   { id: 'bug', label: 'Баг-репорты' },
 ];
 
-export const Sidebar = ({ currentScreen, history, onNavigate, onFilterTasks }: SidebarProps) => {
+function userInitials(email: string): string {
+  return email.charAt(0).toUpperCase();
+}
+
+export const Sidebar = ({
+  currentScreen,
+  history,
+  authUser,
+  onNavigate,
+  onFilterTasks,
+  onLogout,
+}: SidebarProps) => {
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
 
@@ -71,13 +84,32 @@ export const Sidebar = ({ currentScreen, history, onNavigate, onFilterTasks }: S
       </nav>
 
       <div className={styles.sidebarUser}>
-        <div className={styles.userAvatar}>QA</div>
+        <div className={styles.userAvatar}>{userInitials(authUser)}</div>
         <div className={styles.userInfo}>
-          <div className={styles.userName}>Junior Tester</div>
+          <div className={styles.userName}>{authUser}</div>
           <div className={styles.userLevel}>
             Уровень {level.level} · {xp} XP
           </div>
         </div>
+      </div>
+
+      <div style={{ padding: '0 20px 16px' }}>
+        <button
+          onClick={onLogout}
+          style={{
+            width: '100%',
+            padding: '8px 0',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            color: 'var(--text2)',
+            fontSize: 13,
+            cursor: 'pointer',
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          Выйти
+        </button>
       </div>
     </aside>
   );

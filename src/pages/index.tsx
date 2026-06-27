@@ -1,43 +1,35 @@
 import { parse } from 'cookie';
-import { GetServerSideProps } from 'next';
+import type { GetServerSideProps } from 'next';
 import { TOKEN_NAME, verifyToken } from '@/shared/lib/auth';
-import { Main } from '@/pages-fsd/main';
+import { TestCraftPage } from '@/pages-fsd/testcraft';
 
-interface MainPageProps {
-  authUser: string | null;
+interface IndexProps {
+  authUser: string;
 }
 
-export default function MainPage({ authUser }: MainPageProps) {
-  return <Main authUser={authUser} />;
+export default function Index({ authUser }: IndexProps) {
+  return <TestCraftPage authUser={authUser} />;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const rawCookies = context.req.headers.cookie;
 
   if (!rawCookies) {
-    return {
-      props: {
-        authUser: null,
-      },
-    };
+    return { redirect: { destination: '/auth', permanent: false } };
   }
 
   const cookies = parse(rawCookies);
   const token = cookies[TOKEN_NAME];
 
   if (!token) {
-    return {
-      props: {
-        authUser: null,
-      },
-    };
+    return { redirect: { destination: '/auth', permanent: false } };
   }
 
   const verified = verifyToken(token);
 
-  return {
-    props: {
-      authUser: verified?.email || null,
-    },
-  };
+  if (!verified) {
+    return { redirect: { destination: '/auth', permanent: false } };
+  }
+
+  return { props: { authUser: verified.email } };
 };

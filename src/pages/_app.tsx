@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { HydrationBoundary, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { AppProps } from 'next/app';
 import { TANSTCK_CLIENT_OPTIONS } from '@/shared/lib/config';
-import '@/shared/styles/index.scss';
+import '@/shared/styles/_root.scss';
+import '@/shared/styles/_colors.scss';
+import '@/shared/styles/_globals.scss';
+import '@/shared/styles/_keyframes.scss';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [client] = useState(() => new QueryClient(TANSTCK_CLIENT_OPTIONS));
