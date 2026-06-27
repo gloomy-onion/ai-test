@@ -1,0 +1,15 @@
+.row {
+  display: flex;
+  gap: 3px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+}
+
+.filled {
+  background: var(--accent3);
+}
