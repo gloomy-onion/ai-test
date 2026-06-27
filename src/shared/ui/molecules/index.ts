@@ -1,5 +1,5 @@
-export { ChatBubble } from './ChatBubble';
-export { HistoryRow } from './HistoryRow';
-export { ScoreCard } from './ScoreCard';
-export { StatCard } from './StatCard';
-export { TaskCard } from './TaskCard';
+export { ChatBubble } from './chat-bubble';
+export { HistoryRow } from './history-row';
+export { ScoreCard } from './score-card';
+export { StatCard } from './stat-card';
+export { TaskCard } from './task-card';

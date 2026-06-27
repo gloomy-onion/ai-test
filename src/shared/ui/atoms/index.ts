@@ -1,6 +1,6 @@
-export { BadgePill } from './BadgePill';
-export { Button } from './Button';
-export { DifficultyDots } from './DifficultyDots';
-export { ProgressBar } from './ProgressBar';
-export { ScoreCircle } from './ScoreCircle';
-export { Spinner, LoadingState } from './Spinner';
+export { BadgePill } from './badge-pill';
+export { Button } from './button';
+export { DifficultyDots } from './difficulty-dots';
+export { ProgressBar } from './progress-bar';
+export { ScoreCircle } from './score-circle';
+export { Spinner, LoadingState } from './spinner';
