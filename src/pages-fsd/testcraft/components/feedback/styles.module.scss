@@ -1,0 +1,82 @@
+.feedbackContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feedbackScoreRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.scoreCardXP {
+  text-align: center;
+  background: rgba(247, 179, 43, 0.08);
+  border-color: rgba(247, 179, 43, 0.25);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.xpEarned {
+  font-size: 13px;
+  color: var(--accent3);
+  font-weight: 600;
+}
+
+.feedbackSection {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.feedbackSectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+.feedbackText {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.feedbackList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feedbackList li {
+  font-size: 13px;
+  color: var(--text);
+  padding-left: 18px;
+  position: relative;
+  line-height: 1.5;
+}
+
+.feedbackList li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--text3);
+}
+
+.feedbackListGood li::before {
+  content: '✓';
+  color: var(--success);
+}
+
+.feedbackListBad li::before {
+  content: '✗';
+  color: var(--danger);
+}

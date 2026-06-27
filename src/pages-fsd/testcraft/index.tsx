@@ -33,7 +33,7 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   settings: ['Настройки API', 'Провайдер и ключ для проверки заданий'],
 };
 
-export function TestCraftPage() {
+export const TestCraftPage = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('dashboard');
   const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -77,7 +77,7 @@ export function TestCraftPage() {
     currentScreen === 'workspace' ? ['', ''] : SCREEN_TITLES[currentScreen] || ['', ''];
 
   return (
-    <div className={styles.app}>
+    <div className={styles.app} data-theme="dark">
       <Sidebar
         currentScreen={currentScreen}
         history={history}
@@ -120,4 +120,4 @@ export function TestCraftPage() {
       </div>
     </div>
   );
-}
+};

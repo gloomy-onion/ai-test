@@ -1,0 +1,149 @@
+.settingsContainer {
+  max-width: 600px;
+}
+
+.settingsTitle {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.settingsDesc {
+  font-size: 14px;
+  color: var(--text2);
+  margin-bottom: 24px;
+}
+
+.settingsCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 16px;
+}
+
+.settingsCardTitle {
+  font-family: var(--font-head);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.settingsCardDesc {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.settingsInput {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 10px;
+}
+
+.settingsInput:focus {
+  border-color: var(--accent);
+}
+
+.settingsActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.providerGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.providerCard {
+  background: var(--bg3);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.providerCard:hover {
+  border-color: var(--border2);
+}
+
+.providerCardSelected {
+  border-color: var(--accent);
+  background: rgba(108, 99, 255, 0.08);
+}
+
+.providerName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.providerNote {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+
+.apiStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-top: 10px;
+}
+
+.apiStatusOk {
+  background: rgba(78, 205, 122, 0.1);
+  border: 1px solid rgba(78, 205, 122, 0.3);
+  color: var(--success);
+}
+
+.apiStatusError {
+  background: rgba(255, 92, 92, 0.1);
+  border: 1px solid rgba(255, 92, 92, 0.3);
+  color: var(--danger);
+}
+
+.apiStatusTesting {
+  background: rgba(108, 99, 255, 0.1);
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  color: var(--accent);
+}
+
+.keyLinks {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.8;
+}
+
+.keyLink {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.freeTag {
+  color: var(--success);
+  font-size: 12px;
+}
+
+.paidTag {
+  color: var(--accent3);
+  font-size: 12px;
+}

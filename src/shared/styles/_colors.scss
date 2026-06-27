@@ -1,0 +1,34 @@
+[data-theme="dark"] {
+  --bg: #0d0f14;
+  --bg2: #13151c;
+  --bg3: #1a1d27;
+  --bg4: #21253300;
+  --surface: #1e2130;
+  --surface2: #252a3a;
+  --border: rgba(255, 255, 255, 0.08);
+  --border2: rgba(255, 255, 255, 0.15);
+  --text: #e8eaf2;
+  --text2: #8b90a8;
+  --text3: #555a70;
+  --accent: #6c63ff;
+  --accent2: #4ecdbe;
+  --accent3: #f7b32b;
+  --danger: #ff5c5c;
+  --success: #4ecd7a;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+[data-theme="dark"],
+[data-theme="dark"] body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
