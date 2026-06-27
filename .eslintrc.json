@@ -1,0 +1,7 @@
+{
+	"extends": [
+		"@rc-foundation/eslint-config-rc",
+		"@rc-foundation/eslint-config-rc/unicorn",
+		"@rc-foundation/eslint-config-rc/fsd-import"
+	]
+}
