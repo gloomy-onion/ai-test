@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { serialize } from 'cookie';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createToken, TOKEN_MAX_AGE, TOKEN_NAME } from '@/shared/lib';
-import { MOCK_USERS } from './lib';
+import { MOCK_USERS } from '@/shared/lib/mock-users';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
