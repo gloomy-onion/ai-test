@@ -57,10 +57,10 @@ export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) =
   return (
     <>
       <div className={styles.statsRow}>
-        <StatCard value={done} label="Заданий выполнено" color="var(--accent)" />
-        <StatCard value={avg ? `${avg}%` : '—'} label="Средний балл" color="var(--accent2)" />
-        <StatCard value={10} label="Доступно заданий" color="var(--accent3)" />
-        <StatCard value={lvl.level} label="Уровень" color="var(--success)" />
+        <StatCard value={done} label="Заданий выполнено" color="accent" />
+        <StatCard value={avg ? `${avg}%` : '—'} label="Средний балл" color="accent2" />
+        <StatCard value={10} label="Доступно заданий" color="accent3" />
+        <StatCard value={lvl.level} label="Уровень" color="success" />
       </div>
 
       <div className={styles.dashProgress}>

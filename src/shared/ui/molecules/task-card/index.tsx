@@ -16,13 +16,19 @@ const TYPE_CLASS: Record<string, string> = {
   ui: styles.typeUi,
 };
 
+const ACCENT_CLASS: Record<string, string> = {
+  '#6c63ff': styles.accent1,
+  '#4ecdbe': styles.accent2,
+  '#ff5c5c': styles.accent3,
+  '#f7b32b': styles.accent4,
+};
+
 export const TaskCard = ({ task, history, onOpen }: TaskCardProps) => {
   const done = history.find((h) => h.taskId === task.id);
 
   return (
     <div
-      className={styles.card}
-      style={{ '--card-accent': task.accent } as React.CSSProperties}
+      className={`${styles.card} ${ACCENT_CLASS[task.accent] || ''}`}
       onClick={() => onOpen(task.id)}
     >
       <div className={styles.meta}>

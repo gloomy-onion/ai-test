@@ -85,15 +85,15 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
         <span>Прогресс уровня</span>
         <span>{lvl.pct}%</span>
       </div>
-      <ProgressBar value={lvl.pct} height={8} className={styles.profileProgress} />
+      <ProgressBar value={lvl.pct} height="md" className={styles.profileProgress} />
 
       <div className={styles.profileStatsGrid}>
-        <StatCard value={done} label="Выполнено заданий" color="var(--accent)" />
-        <StatCard value={avg ? `${avg}%` : '—'} label="Средний балл" color="var(--accent2)" />
-        <StatCard value={best || '—'} label="Лучший результат" color="var(--success)" />
-        <StatCard value={xp} label="Всего XP" color="var(--accent3)" />
-        <StatCard value={TASKS.length - done} label="Осталось заданий" color="var(--text2)" />
-        <StatCard value={lvl.level} label="Текущий уровень" color="var(--accent)" />
+        <StatCard value={done} label="Выполнено заданий" color="accent" />
+        <StatCard value={avg ? `${avg}%` : '—'} label="Средний балл" color="accent2" />
+        <StatCard value={best || '—'} label="Лучший результат" color="success" />
+        <StatCard value={xp} label="Всего XP" color="accent3" />
+        <StatCard value={TASKS.length - done} label="Осталось заданий" color="text2" />
+        <StatCard value={lvl.level} label="Текущий уровень" color="accent" />
       </div>
 
       <div className={styles.sectionTitle}>Достижения</div>

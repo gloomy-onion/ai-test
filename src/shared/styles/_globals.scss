@@ -37,6 +37,11 @@ a {
   max-width: 320px;
 }
 
+.noscriptFrame {
+  display: none;
+  visibility: hidden;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

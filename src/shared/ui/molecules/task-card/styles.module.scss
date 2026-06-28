@@ -16,7 +16,23 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--card-accent, var(--accent));
+  background: var(--accent);
+}
+
+.accent1::before {
+  background: #6c63ff;
+}
+
+.accent2::before {
+  background: #4ecdbe;
+}
+
+.accent3::before {
+  background: #ff5c5c;
+}
+
+.accent4::before {
+  background: #f7b32b;
 }
 
 .card:hover {

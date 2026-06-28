@@ -12,6 +12,26 @@
   line-height: 1;
 }
 
+.numAccent {
+  color: var(--accent);
+}
+
+.numAccent2 {
+  color: var(--accent2);
+}
+
+.numAccent3 {
+  color: var(--accent3);
+}
+
+.numSuccess {
+  color: var(--success);
+}
+
+.numText2 {
+  color: var(--text2);
+}
+
 .label {
   font-size: 12px;
   color: var(--text2);

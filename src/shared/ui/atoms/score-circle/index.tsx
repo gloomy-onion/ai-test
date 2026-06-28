@@ -6,22 +6,22 @@ interface ScoreCircleProps {
   score: number;
 }
 
-export function scoreColor(n: number): string {
+function scoreVariant(n: number): 'high' | 'mid' | 'low' {
   if (n >= 80) {
-    return '#4ecd7a';
+    return 'high';
   }
   if (n >= 55) {
-    return '#f7b32b';
+    return 'mid';
   }
 
-  return '#ff5c5c';
+  return 'low';
 }
 
 export const ScoreCircle = ({ score }: ScoreCircleProps) => {
-  const color = scoreColor(score);
+  const variant = scoreVariant(score);
 
   return (
-    <div className={styles.circle} style={{ borderColor: color, color }}>
+    <div className={`${styles.circle} ${styles[variant]}`}>
       {score}
     </div>
   );
