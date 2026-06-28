@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { parse } from 'cookie';
+import { TOKEN_NAME, verifyToken } from '@/shared/lib/auth';
 
 function generateNonce(): string {
   const array = crypto.getRandomValues(new Uint8Array(16));
   return btoa(String.fromCharCode(...array));
 }
 
-export function middleware(request: NextRequest) {
-  const nonce = generateNonce();
-
+function buildCspHeader(nonce: string): string {
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com;
@@ -22,28 +22,43 @@ export function middleware(request: NextRequest) {
     frame-ancestors 'none';
     upgrade-insecure-requests;
   `;
+  return cspHeader.replace(/\s{2,}/g, ' ').trim();
+}
 
-  const contentSecurityPolicyHeaderValue = cspHeader
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+export function middleware(request: NextRequest) {
+  const nonce = generateNonce();
+  const csp = buildCspHeader(nonce);
 
+  const { pathname } = request.nextUrl;
+
+  const publicPaths = ['/auth', '/api/auth/login'];
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+
+  if (!isPublicPath) {
+    const rawCookies = request.headers.get('cookie');
+    const cookies = rawCookies ? parse(rawCookies) : {};
+    const token = cookies[TOKEN_NAME];
+    const verified = token ? await verifyToken(token) : null;
+
+    if (!verified) {
+      const redirectResponse = NextResponse.redirect(new URL('/auth', request.url));
+      redirectResponse.headers.set('Content-Security-Policy', csp);
+      return redirectResponse;
+    }
+  }
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
-  requestHeaders.set('Content-Security-Policy', contentSecurityPolicyHeaderValue);
+  requestHeaders.set('Content-Security-Policy', csp);
 
   const response = NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
+    request: { headers: requestHeaders },
   });
 
-  response.headers.set('Content-Security-Policy', contentSecurityPolicyHeaderValue);
+  response.headers.set('Content-Security-Policy', csp);
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

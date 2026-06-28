@@ -1,6 +1,9 @@
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'fallback-secret'
+);
+
 export const TOKEN_NAME = 'auth-token';
 export const TOKEN_MAX_AGE = 30 * 60;
 
@@ -10,15 +13,18 @@ export interface TokenPayload {
   exp: number;
 }
 
-export function createToken(email: string): string {
-  return jwt.sign({ email }, JWT_SECRET, {
-    expiresIn: TOKEN_MAX_AGE,
-  });
+export async function createToken(email: string): Promise<string> {
+  return new SignJWT({ email })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(Date.now() / 1000) + TOKEN_MAX_AGE)
+    .sign(JWT_SECRET);
 }
 
-export function verifyToken(token: string): TokenPayload | null {
+export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return payload as unknown as TokenPayload;
   } catch {
     return null;
   }

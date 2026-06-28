@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const cookie = serialize(TOKEN_NAME, createToken(email), {
+    const cookie = serialize(TOKEN_NAME, await createToken(email), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
