@@ -153,24 +153,24 @@ export const WorkspaceScreen = ({
     <div className={styles.workspace}>
       <div className={styles.wsPanel}>
         <div className={styles.wsPanelHeader}>
-          <span className={styles.wsPanelDot} style={{ background: 'var(--accent2)' }} />
+          <span className={`${styles.wsPanelDot} ${styles.wsPanelDotAccent2}`} />
           <span className={styles.wsPanelTitle}>Требования и задание</span>
         </div>
         <div className={styles.wsPanelBody}>
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Тип документа</div>
-            <div style={{ fontSize: 14, color: 'var(--text)' }}>{task.docLabel}</div>
+            <div className={styles.requirementValue}>{task.docLabel}</div>
           </div>
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Задание</div>
-            <div style={{ fontSize: 13, color: 'var(--text)' }}>{task.desc}</div>
+            <div className={styles.requirementText}>{task.desc}</div>
           </div>
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Требования</div>
-            <div style={{ whiteSpace: 'pre-wrap', fontSize: 13 }}>{task.requirement}</div>
+            <div className={styles.requirementText}>{task.requirement}</div>
           </div>
-          <div style={{ marginTop: 12 }}>
-            <div className={styles.reqLabel} style={{ marginBottom: 8 }}>
+          <div className={styles.hintsWrap}>
+            <div className={`${styles.reqLabel} ${styles.hintsLabel}`}>
               Быстрые шаблоны
             </div>
             <div className={styles.templateHints}>
@@ -202,7 +202,7 @@ export const WorkspaceScreen = ({
 
       <div className={styles.wsPanel}>
         <div className={styles.wsPanelHeader}>
-          <span className={styles.wsPanelDot} style={{ background: 'var(--accent)' }} />
+          <span className={`${styles.wsPanelDot} ${styles.wsPanelDotAccent}`} />
           <span className={styles.wsPanelTitle}>Ваш ответ</span>
           <span className={styles.charCount}>
             {chars} симв. · {lines} стр.
@@ -236,7 +236,7 @@ export const WorkspaceScreen = ({
             <div className={styles.hintPanel}>
               <div className={styles.hintPanelHeader}>
                 <span>💡 Подсказка AI</span>
-                <span style={{ cursor: 'pointer', opacity: 0.8 }} onClick={() => setHintText('')}>
+                <span className={styles.closeHint} onClick={() => setHintText('')}>
                   ✕
                 </span>
               </div>
@@ -252,8 +252,8 @@ export const WorkspaceScreen = ({
               </div>
             )}
             {error && (
-              <div className={styles.feedbackSection} style={{ borderColor: 'var(--danger)' }}>
-                <div className={styles.feedbackSectionTitle} style={{ color: 'var(--danger)' }}>
+              <div className={`${styles.feedbackSection} ${styles.feedbackSectionError}`}>
+                <div className={`${styles.feedbackSectionTitle} ${styles.feedbackSectionTitleError}`}>
                   Ошибка
                 </div>
                 <div className={styles.feedbackText}>{error}</div>

@@ -8,10 +8,24 @@ function generateNonce(): string {
 }
 
 function buildCspHeader(nonce: string): string {
+  const isDev = process.env.NODE_ENV === 'development';
+  const scriptSrc = [
+    "'self'",
+    `'nonce-${nonce}'`,
+    'https://www.googletagmanager.com',
+    isDev && "'unsafe-eval'",
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const styleSrc = isDev
+    ? "'self' 'unsafe-inline' https://fonts.googleapis.com"
+    : `'self' 'nonce-${nonce}' https://fonts.googleapis.com`;
+
   const cspHeader = `
   default-src 'self';
-  script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com;
-  style-src 'self' 'nonce-${nonce}' https://fonts.googleapis.com;
+  script-src ${scriptSrc};
+  style-src ${styleSrc};
   img-src 'self' blob: data: https://www.googletagmanager.com https://www.google-analytics.com;
   font-src 'self' https://fonts.gstatic.com;
   connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com;

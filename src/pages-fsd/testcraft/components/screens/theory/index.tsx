@@ -76,16 +76,8 @@ export const TheoryScreen = () => {
 
       <div className={styles.theoryChatBox}>
         <div className={styles.theoryChatHeader}>
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              background: 'var(--accent2)',
-              borderRadius: '50%',
-              flexShrink: 0,
-            }}
-          />
-          <span style={{ fontFamily: 'var(--font-head)', fontSize: 14, fontWeight: 600 }}>
+          <span className={styles.theoryChatDot} />
+          <span className={styles.theoryChatHeaderTitle}>
             AI-консультант
           </span>
           <span className={styles.theoryChatHint}>Задайте любой вопрос по QA</span>

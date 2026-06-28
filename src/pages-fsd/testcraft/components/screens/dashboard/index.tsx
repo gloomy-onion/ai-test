@@ -85,14 +85,7 @@ export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) =
                 🔥 {done} {tasksWord}
               </span>
               {avg ? (
-                <span
-                  className={styles.streakBadge}
-                  style={{
-                    background: 'rgba(108,99,255,0.1)',
-                    borderColor: 'rgba(108,99,255,0.3)',
-                    color: 'var(--accent)',
-                  }}
-                >
+                <span className={`${styles.streakBadge} ${styles.streakBadgeAccent}`}>
                   📊 Среднее {avg}%
                 </span>
               ) : null}

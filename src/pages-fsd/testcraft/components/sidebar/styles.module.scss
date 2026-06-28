@@ -147,3 +147,19 @@
   font-size: 11px;
   color: var(--accent2);
 }
+
+.logoutWrap {
+  padding: 0 20px 16px;
+}
+
+.logoutBtn {
+  width: 100%;
+  padding: 8px 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-body);
+}

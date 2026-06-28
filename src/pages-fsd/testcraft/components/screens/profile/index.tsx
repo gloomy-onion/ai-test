@@ -105,7 +105,7 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
             <BadgePill key={b.id} earned={earned}>
               <span>{b.icon}</span>
               <span>{b.label}</span>
-              {!earned && <span style={{ color: 'var(--text3)', fontSize: 11 }}>🔒</span>}
+              {!earned && <span className={styles.badgeLock}>🔒</span>}
             </BadgePill>
           );
         })}
@@ -117,7 +117,7 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
           <HistoryRow key={`${h.taskId}-${h.date}`} entry={h} onRepeat={onOpenTask} />
         ))
       ) : (
-        <div style={{ fontSize: 14, color: 'var(--text3)' }}>
+        <div className={styles.emptyMessage}>
           Выполните задания, чтобы увидеть результаты.
         </div>
       )}

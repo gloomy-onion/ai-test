@@ -194,3 +194,30 @@
 .emptyText {
   font-size: 14px;
 }
+
+.requirementText {
+  font-size: 13px;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.hintsWrap {
+  margin-top: 12px;
+}
+
+.hintsLabel {
+  margin-bottom: 8px;
+}
+
+.closeHint {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.feedbackSectionError {
+  border-color: var(--danger);
+}
+
+.feedbackSectionTitleError {
+  color: var(--danger);
+}

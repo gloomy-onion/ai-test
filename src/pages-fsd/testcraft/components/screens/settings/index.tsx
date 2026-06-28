@@ -85,7 +85,7 @@ export const SettingsScreen = () => {
               <div className={styles.providerName}>{p.name}</div>
               <div className={styles.providerNote}>
                 {p.free ? (
-                  <span style={{ color: 'var(--success)' }}>Бесплатно</span>
+                  <span className={styles.freeText}>Бесплатно</span>
                 ) : p.name === 'Claude' ? (
                   'Anthropic'
                 ) : (
@@ -138,11 +138,8 @@ export const SettingsScreen = () => {
         </div>
       )}
 
-      <div
-        className={styles.settingsCard}
-        style={{ background: 'rgba(78,205,190,0.04)', borderColor: 'rgba(78,205,190,0.2)' }}
-      >
-        <div className={styles.settingsCardTitle} style={{ color: 'var(--accent2)' }}>
+      <div className={`${styles.settingsCard} ${styles.settingsCardGreen}`}>
+        <div className={`${styles.settingsCardTitle} ${styles.settingsCardTitleGreen}`}>
           Где взять ключ?
         </div>
         <div className={styles.keyLinks}>
@@ -169,21 +166,19 @@ export const SettingsScreen = () => {
 
       <div className={styles.settingsCard}>
         <div className={styles.settingsCardTitle}>Текущее состояние</div>
-        <div id="currentStatusText" style={{ fontSize: 13, color: 'var(--text2)' }}>
+        <div className={styles.statusText}>
           Провайдер: <b>{prov?.name}</b>
-          {prov?.free
-            ? ' <span style="color:var(--success);font-size:11px">● бесплатно</span>'
-            : ''}
+          {prov?.free ? <span className={styles.statusTextSuccess}>● бесплатно</span> : ''}
           {' · '}
           Ключ:{' '}
           {keyInput ? (
-            <span style={{ color: 'var(--success)' }}>
+            <span className={styles.statusTextSuccess}>
               ✓ Ключ сохранён ({keyInput.slice(0, 8)}...)
             </span>
           ) : isClaude ? (
-            <span style={{ color: 'var(--accent2)' }}>✓ Авто-авторизация (claude.ai)</span>
+            <span className={styles.statusTextAuto}>✓ Авто-авторизация (claude.ai)</span>
           ) : (
-            <span style={{ color: 'var(--danger)' }}>✗ Ключ не добавлен</span>
+            <span className={styles.statusTextMissing}>✗ Ключ не добавлен</span>
           )}
         </div>
       </div>

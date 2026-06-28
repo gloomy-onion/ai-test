@@ -93,21 +93,8 @@ export const Sidebar = ({
         </div>
       </div>
 
-      <div style={{ padding: '0 20px 16px' }}>
-        <button
-          onClick={onLogout}
-          style={{
-            width: '100%',
-            padding: '8px 0',
-            borderRadius: 'var(--radius-sm)',
-            border: '1px solid var(--border)',
-            background: 'transparent',
-            color: 'var(--text2)',
-            fontSize: 13,
-            cursor: 'pointer',
-            fontFamily: 'var(--font-body)',
-          }}
-        >
+      <div className={styles.logoutWrap}>
+        <button className={styles.logoutBtn} onClick={onLogout}>
           Выйти
         </button>
       </div>

@@ -67,6 +67,12 @@
   font-weight: 500;
 }
 
+.streakBadgeAccent {
+  background: rgba(108, 99, 255, 0.1);
+  border-color: rgba(108, 99, 255, 0.3);
+  color: var(--accent);
+}
+
 .dashChart {
   flex-shrink: 0;
   opacity: 0.9;

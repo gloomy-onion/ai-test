@@ -147,3 +147,34 @@
   color: var(--accent3);
   font-size: 12px;
 }
+
+.freeText {
+  color: var(--success);
+}
+
+.settingsCardGreen {
+  background: rgba(78, 205, 190, 0.04);
+  border-color: rgba(78, 205, 190, 0.2);
+}
+
+.settingsCardTitleGreen {
+  color: var(--accent2);
+}
+
+.statusText {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.statusTextSuccess {
+  color: var(--success);
+  font-size: 11px;
+}
+
+.statusTextAuto {
+  color: var(--accent2);
+}
+
+.statusTextMissing {
+  color: var(--danger);
+}
