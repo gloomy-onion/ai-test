@@ -25,12 +25,11 @@ function buildCspHeader(nonce: string): string {
   return cspHeader.replace(/\s{2,}/g, ' ').trim();
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const nonce = generateNonce();
   const csp = buildCspHeader(nonce);
 
   const { pathname } = request.nextUrl;
-
   const publicPaths = ['/auth', '/api/auth/login'];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
@@ -46,6 +45,7 @@ export function middleware(request: NextRequest) {
       return redirectResponse;
     }
   }
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', csp);
