@@ -12,6 +12,8 @@ function buildCspHeader(nonce: string): string {
   const scriptSrc = [
     "'self'",
     `'nonce-${nonce}'`,
+    "'strict-dynamic'",
+    'https:',
     'https://www.googletagmanager.com',
     isDev && "'unsafe-eval'",
   ]
