@@ -10,7 +10,6 @@ function generateNonce(): string {
 function buildCspHeader(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
   const scriptSrc = [
-    "'self'",
     "'strict-dynamic'",
     `'nonce-${nonce}'`,
     'https://www.googletagmanager.com',
