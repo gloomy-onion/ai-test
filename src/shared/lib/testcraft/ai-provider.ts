@@ -18,7 +18,7 @@ export const PROVIDERS: Record<string, AIProvider> = {
   groq: {
     name: 'Groq',
     url: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'llama3-8b-8192',
+    model: 'llama-3.3-70b-versatile',
     keyHint: 'gsk_...',
     free: true,
   },
