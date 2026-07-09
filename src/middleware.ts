@@ -1,11 +1,11 @@
-// import { NextRequest, NextResponse } from 'next/server';
-// import { parse } from 'cookie';
-// import { TOKEN_NAME, verifyToken } from '@/shared/lib/auth';
-//
-// function generateNonce(): string {
-//   const array = crypto.getRandomValues(new Uint8Array(16));
-//   return btoa(String.fromCharCode(...array));
-// }
+import { NextRequest, NextResponse } from 'next/server';
+import { parse } from 'cookie';
+import { TOKEN_NAME, verifyToken } from '@/shared/lib/auth';
+
+function generateNonce(): string {
+  const array = crypto.getRandomValues(new Uint8Array(16));
+  return btoa(String.fromCharCode(...array));
+}
 //
 // function buildCspHeader(nonce: string): string {
 //   const isDev = process.env.NODE_ENV === 'development';
@@ -77,3 +77,29 @@
 // export const config = {
 //   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 // };
+export async function middleware(request: NextRequest) {
+  const nonce = generateNonce();
+
+  const { pathname } = request.nextUrl;
+  const publicPaths = ['/auth', '/api/auth/login'];
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+
+  if (!isPublicPath) {
+    const rawCookies = request.headers.get('cookie');
+    const cookies = rawCookies ? parse(rawCookies) : {};
+    const token = cookies[TOKEN_NAME];
+    const verified = token ? await verifyToken(token) : null;
+
+    if (!verified) {
+
+      return NextResponse.redirect(new URL('/auth', request.url));
+    }
+  }
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+}
