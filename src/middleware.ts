@@ -77,6 +77,10 @@ function generateNonce(): string {
 // export const config = {
 //   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 // };
+
+export const config = {
+  matcher: ['/((?!_next|favicon.ico).*)'],
+};
 export async function middleware(request: NextRequest) {
   const nonce = generateNonce();
 
