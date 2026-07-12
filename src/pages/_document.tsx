@@ -10,23 +10,9 @@ interface ExtendedDocumentProps extends DocumentInitialProps {
 }
 
 class MyDocument extends Document<ExtendedDocumentProps> {
-  static async getInitialProps(ctx: DocumentContext): Promise<ExtendedDocumentProps> {
+  static async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
-
-    // основной путь — из заголовка запроса (должен работать и на Vercel, и локально)
-    let nonce = ctx.req?.headers?.['x-nonce'] as string | undefined;
-
-    console.log('NONCE from req header:', nonce);
-
-    // fallback только для локальной отладки, не полагайтесь на него в проде
-    if (!nonce) {
-      const cspHeader = ctx.res?.getHeader('Content-Security-Policy');
-      if (typeof cspHeader === 'string') {
-        nonce = cspHeader.match(/script-src[^;]*'nonce-([^']+)'/)?.[1];
-      }
-      console.log('NONCE from res header (fallback):', nonce);
-    }
-
+    const nonce = ctx.req?.headers?.['x-nonce'] as string | undefined;
     return { ...initialProps, nonce };
   }
 

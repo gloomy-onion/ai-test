@@ -51,6 +51,9 @@ export async function middleware(request: NextRequest) {
   const publicPaths = ['/auth', '/api/auth/login'];
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+
   if (!isPublicPath) {
     const rawCookies = request.headers.get('cookie');
     const cookies = rawCookies ? parse(rawCookies) : {};
@@ -64,7 +67,9 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next();
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   response.headers.set('Content-Security-Policy', csp);
 
