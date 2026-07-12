@@ -7,20 +7,13 @@ function generateNonce(): string {
   return btoa(String.fromCharCode(...array));
 }
 
-const ALLOWED_IMAGE_SOURCES = [
-  "'self'",
-  'https://www.googletagmanager.com',
-  'https://www.google-analytics.com',
-];
-
 function buildCspHeader(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
 
   const scriptSrc = [
     "'self'",
     `'nonce-${nonce}'`,
-    'https://www.googletagmanager.com',
-    "'sha256-iI0nkD5GMoM7F3yzaSO5Lb7FKxTvUd0hx2bMCE9hZtk='",
+    "'strict-dynamic'",
     isDev && "'unsafe-eval'",
   ]
     .filter(Boolean)
@@ -30,15 +23,13 @@ function buildCspHeader(nonce: string): string {
     ? "'self' 'unsafe-inline' https://fonts.googleapis.com"
     : "'self' https://fonts.googleapis.com";
 
-  const imgSrc = [...ALLOWED_IMAGE_SOURCES].join(' ');
-
   return [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
     `style-src ${styleSrc}`,
-    `img-src ${imgSrc}`,
+    "img-src 'self' blob: data: https://www.googletagmanager.com https://www.google-analytics.com https://mc.yandex.ru https://connect.facebook.net",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com",
+    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://mc.yandex.ru https://connect.facebook.net",
     'frame-src https://www.googletagmanager.com',
     "object-src 'none'",
     "base-uri 'self'",
