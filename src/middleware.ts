@@ -29,8 +29,8 @@ function buildCspHeader(nonce: string): string {
     `style-src ${styleSrc}`,
     "img-src 'self' blob: data: https://www.googletagmanager.com https://www.google-analytics.com https://mc.yandex.ru https://connect.facebook.net",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://mc.yandex.ru https://connect.facebook.net",
-    'frame-src https://www.googletagmanager.com',
+    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://mc.yandex.ru wss://mc.yandex.ru https://connect.facebook.net",
+    'frame-src https://www.googletagmanager.com https://mc.yandex.ru',
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -64,12 +64,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
-
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
+  const response = NextResponse.next();
 
   response.headers.set('Content-Security-Policy', csp);
 

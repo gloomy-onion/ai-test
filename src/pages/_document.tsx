@@ -1,24 +1,27 @@
-import Document, { Html, Head, Main, NextScript } from 'next/document';
+import Document, {
+  Html, Head, Main, NextScript,
+  DocumentContext, DocumentInitialProps,
+} from 'next/document';
 
 const GTM_ID = 'GTM-MZZSQJ6N';
 
-class MyDocument extends Document<{ nonce?: string }> {
-  static async getInitialProps(ctx: any) {
-    const initialProps = await Document.getInitialProps(ctx);
-    const nonce = ctx.req?.headers['x-nonce'];
+interface ExtendedDocumentProps extends DocumentInitialProps {
+  nonce?: string;
+}
 
-    return {
-      ...initialProps,
-      nonce,
-    };
+class MyDocument extends Document<ExtendedDocumentProps> {
+  static async getInitialProps(ctx: DocumentContext): Promise<ExtendedDocumentProps> {
+    const initialProps = await Document.getInitialProps(ctx);
+    const nonce = ctx.req?.headers['x-nonce'] as string | undefined;
+    return { ...initialProps, nonce };
   }
 
   render() {
-    const nonce = (this.props as any).nonce;
+    const { nonce } = this.props;
 
     return (
       <Html lang="en">
-        <Head>
+        <Head nonce={nonce}>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
@@ -38,16 +41,13 @@ class MyDocument extends Document<{ nonce?: string }> {
                       j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
                   j.async=true;
                   j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-                  j.nonce='${nonce}';
                   f.parentNode.insertBefore(j,f);
                 })(window,document,'script','dataLayer','${GTM_ID}');
               `,
             }}
           />
-          {/* End Google Tag Manager */}
         </Head>
         <body>
-        {/* Google Tag Manager (noscript) */}
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
@@ -56,7 +56,6 @@ class MyDocument extends Document<{ nonce?: string }> {
             className="noscriptFrame"
           />
         </noscript>
-        {/* End Google Tag Manager (noscript) */}
 
         <Main />
         <NextScript nonce={nonce} />
