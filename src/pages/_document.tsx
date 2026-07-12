@@ -13,11 +13,18 @@ class MyDocument extends Document<ExtendedDocumentProps> {
   static async getInitialProps(ctx: DocumentContext): Promise<ExtendedDocumentProps> {
     const initialProps = await Document.getInitialProps(ctx);
 
-    let nonce: string | undefined;
-    const cspHeader = ctx.res?.getHeader('Content-Security-Policy');
-    if (typeof cspHeader === 'string') {
-      const match = cspHeader.match(/'nonce-([^']+)'/);
-      nonce = match?.[1];
+    // основной путь — из заголовка запроса (должен работать и на Vercel, и локально)
+    let nonce = ctx.req?.headers?.['x-nonce'] as string | undefined;
+
+    console.log('NONCE from req header:', nonce);
+
+    // fallback только для локальной отладки, не полагайтесь на него в проде
+    if (!nonce) {
+      const cspHeader = ctx.res?.getHeader('Content-Security-Policy');
+      if (typeof cspHeader === 'string') {
+        nonce = cspHeader.match(/script-src[^;]*'nonce-([^']+)'/)?.[1];
+      }
+      console.log('NONCE from res header (fallback):', nonce);
     }
 
     return { ...initialProps, nonce };
