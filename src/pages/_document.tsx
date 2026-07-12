@@ -12,7 +12,14 @@ interface ExtendedDocumentProps extends DocumentInitialProps {
 class MyDocument extends Document<ExtendedDocumentProps> {
   static async getInitialProps(ctx: DocumentContext): Promise<ExtendedDocumentProps> {
     const initialProps = await Document.getInitialProps(ctx);
-    const nonce = ctx.req?.headers['x-nonce'] as string | undefined;
+
+    let nonce: string | undefined;
+    const cspHeader = ctx.res?.getHeader('Content-Security-Policy');
+    if (typeof cspHeader === 'string') {
+      const match = cspHeader.match(/'nonce-([^']+)'/);
+      nonce = match?.[1];
+    }
+
     return { ...initialProps, nonce };
   }
 
