@@ -10,12 +10,7 @@ function generateNonce(): string {
 function buildCspHeader(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
 
-  const scriptSrc = [
-    "'self'",
-    `'nonce-${nonce}'`,
-    "'strict-dynamic'",
-    isDev && "'unsafe-eval'",
-  ]
+  const scriptSrc = ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", isDev && "'unsafe-eval'"]
     .filter(Boolean)
     .join(' ');
 
@@ -27,10 +22,17 @@ function buildCspHeader(nonce: string): string {
     "default-src 'self'",
     `script-src ${scriptSrc}`,
     `style-src ${styleSrc}`,
-    "img-src 'self' blob: data: https://www.googletagmanager.com https://www.google-analytics.com https://mc.yandex.ru https://connect.facebook.net",
+    "img-src 'self' blob: data: https://www.googletagmanager.com https://www.google-analytics.com",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://mc.yandex.ru wss://mc.yandex.ru https://connect.facebook.net",
-    'frame-src https://www.googletagmanager.com https://mc.yandex.ru',
+    [
+      'connect-src',
+      "'self'",
+      'https://api.groq.com',
+      'https://www.google-analytics.com',
+      'https://analytics.google.com',
+      'https://www.googletagmanager.com',
+    ].join(' '),
+    'frame-src https://www.googletagmanager.com',
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
