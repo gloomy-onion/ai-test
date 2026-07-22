@@ -2,6 +2,7 @@ export {
   Button,
   LoadingState,
   BadgePill,
+  Markdown,
   Spinner,
   DifficultyDots,
   ProgressBar,

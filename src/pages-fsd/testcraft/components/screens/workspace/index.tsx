@@ -12,7 +12,7 @@ import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@
 import { TASKS, HINTS_MAP } from '@/shared/lib/testcraft/tasks-data';
 import { calculateRetryXP } from '@/shared/lib/testcraft/xp-system';
 import type { HistoryEntry, FeedbackResult } from '@/shared/lib/testcraft/types';
-import { Button, Spinner } from '@/shared/ui';
+import { Button, Spinner, Markdown } from '@/shared/ui';
 import { FeedbackPanel } from '../../feedback';
 import styles from './styles.module.scss';
 
@@ -42,6 +42,7 @@ export const WorkspaceScreen = ({
   const [selfScore, setSelfScore] = useState<number>(0);
   const [showSelfAssess, setShowSelfAssess] = useState(false);
   const [hasResult, setHasResult] = useState(false);
+  const [preview, setPreview] = useState(false);
 
   const attempt = getAttemptCount(history, taskId);
   const prevBest = getBestScore(history, taskId);
@@ -194,7 +195,7 @@ export const WorkspaceScreen = ({
           )}
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Требования</div>
-            <div className={styles.requirementText}>{task.requirement}</div>
+            <Markdown className={styles.requirementText}>{task.requirement}</Markdown>
           </div>
           <div className={styles.hintsWrap}>
             <div className={`${styles.reqLabel} ${styles.hintsLabel}`}>
@@ -236,14 +237,20 @@ export const WorkspaceScreen = ({
           </span>
         </div>
         <div className={styles.wsPanelBodyColumn}>
-          <textarea
-            id="answerArea"
-            className={styles.taskTextarea}
-            rows={16}
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-            placeholder={task.placeholder}
-          />
+          {preview ? (
+            <div className={styles.previewArea}>
+              <Markdown className={styles.previewMarkdown}>{answer || '*Начните писать ответ...*'}</Markdown>
+            </div>
+          ) : (
+            <textarea
+              id="answerArea"
+              className={styles.taskTextarea}
+              rows={16}
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              placeholder={task.placeholder}
+            />
+          )}
 
           {!hasResult && !showSelfAssess && (
             <div className={styles.selfAssessPrompt}>
@@ -268,6 +275,9 @@ export const WorkspaceScreen = ({
           )}
 
           <div className={styles.wsActions}>
+            <Button size="sm" onClick={() => setPreview((p) => !p)}>
+              {preview ? '✏️ Редактировать' : '👁️ Предпросмотр'}
+            </Button>
             <Button size="sm" onClick={handleGetHint} disabled={hintLoading}>
               💡 {hintLoading ? 'Загрузка...' : 'Подсказка'}
             </Button>

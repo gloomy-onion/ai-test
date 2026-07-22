@@ -1,5 +1,6 @@
 'use client';
 
+import { TASKS } from '@/shared/lib/testcraft/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/testcraft/types';
 import { getTotalXP, getLevelInfo } from '@/shared/lib/testcraft/xp-system';
 import styles from './styles.module.scss';
@@ -11,11 +12,17 @@ interface SidebarProps {
   onNavigate: (screen: string) => void;
   onFilterTasks: (type: string) => void;
   onLogout: () => void;
+  activeFilter?: string;
+}
+
+function getRemainingTasks(history: HistoryEntry[]): number {
+  const solved = new Set(history.map((h) => h.taskId));
+  return TASKS.length - solved.size;
 }
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Дашборд' },
-  { id: 'tasks', label: 'Задания', badge: 10 },
+  { id: 'tasks', label: 'Задания' },
   { id: 'history', label: 'История' },
   { id: 'theory', label: 'Теория' },
   { id: 'profile', label: 'Профиль' },
@@ -40,6 +47,7 @@ export const Sidebar = ({
   onNavigate,
   onFilterTasks,
   onLogout,
+  activeFilter,
 }: SidebarProps) => {
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
@@ -67,7 +75,9 @@ export const Sidebar = ({
             >
               <div className={styles.navDot} />
               {item.label}
-              {item.badge ? <span className={styles.navBadge}>{item.badge}</span> : null}
+              {item.id === 'tasks' ? (
+                <span className={styles.navBadge}>{getRemainingTasks(history)}</span>
+              ) : null}
             </div>
           ))}
         </div>
@@ -75,7 +85,11 @@ export const Sidebar = ({
         <div className={styles.navSection}>
           <div className={styles.navLabel}>Виды тестирования</div>
           {FILTER_ITEMS.map((item) => (
-            <div key={item.id} className={styles.navItem} onClick={() => onFilterTasks(item.id)}>
+            <div
+              key={item.id}
+              className={`${styles.navItem} ${activeFilter === item.id ? styles.navItemActive : ''}`}
+              onClick={() => onFilterTasks(item.id)}
+            >
               <div className={styles.navDot} />
               {item.label}
             </div>

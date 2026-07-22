@@ -24,23 +24,35 @@ const ACCENT_CLASS: Record<string, string> = {
 };
 
 export const TaskCard = ({ task, history, onOpen }: TaskCardProps) => {
-  const done = history.find((h) => h.taskId === task.id);
+  const best = [...history]
+    .filter((h) => h.taskId === task.id)
+    .sort((a, b) => b.score - a.score)[0];
+
+  const isSolved = !!best;
 
   return (
     <div
-      className={`${styles.card} ${ACCENT_CLASS[task.accent] || ''}`}
+      className={`${styles.card} ${ACCENT_CLASS[task.accent] || ''} ${isSolved ? styles.cardSolved : styles.cardUnsolved}`}
       onClick={() => onOpen(task.id)}
     >
+      {isSolved && <div className={styles.solvedRibbon}>✓</div>}
       <div className={styles.meta}>
         <span className={`${styles.type} ${TYPE_CLASS[task.type] || ''}`}>{task.typeLabel}</span>
         <DifficultyDots level={task.difficulty} />
+        {isSolved && (
+          <span className={styles.solvedPill}>
+            ✓ {best.score}%
+          </span>
+        )}
       </div>
       <div className={styles.title}>{task.title}</div>
       <div className={styles.desc}>{task.desc}</div>
       <div className={styles.footer}>
         <span className={styles.stat}>+{task.xp} XP</span>
         <span className={styles.stat}>{task.docLabel}</span>
-        {done ? <span className={styles.completed}>✓ {done.score}%</span> : null}
+        <span className={isSolved ? styles.statDone : styles.statTodo}>
+          {isSolved ? 'Выполнено' : 'Не решено'}
+        </span>
       </div>
     </div>
   );

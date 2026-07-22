@@ -17,11 +17,44 @@
   border-radius: 6px;
   color: var(--text2);
   transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .tabActive {
   background: var(--surface);
   color: var(--text);
+}
+
+.tabCount {
+  font-size: 10px;
+  color: var(--text3);
+  font-family: var(--font-mono);
+}
+
+.tabCountDone {
+  font-size: 10px;
+  color: var(--success);
+  font-family: var(--font-mono);
+}
+
+.tasksSummary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.summaryDone {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.summaryTotal {
+  color: var(--text3);
 }
 
 .tasksGrid {

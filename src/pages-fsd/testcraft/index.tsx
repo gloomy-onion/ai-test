@@ -41,6 +41,7 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('dashboard');
   const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [tasksFilter, setTasksFilter] = useState('all');
 
   useEffect(() => {
     setHistory(loadHistory());
@@ -73,6 +74,7 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
   }, []);
 
   const handleFilterTasks = useCallback((type: string) => {
+    setTasksFilter(type);
     setCurrentScreen('tasks');
   }, []);
 
@@ -93,6 +95,7 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
         onNavigate={handleNavigate}
         onFilterTasks={handleFilterTasks}
         onLogout={handleLogout}
+        activeFilter={currentScreen === 'tasks' ? tasksFilter : undefined}
       />
 
       <div className={styles.main}>
@@ -103,7 +106,7 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
             <DashboardScreen history={history} onOpenTask={handleOpenTask} />
           )}
           {currentScreen === 'tasks' && (
-            <TasksListScreen history={history} onOpenTask={handleOpenTask} />
+            <TasksListScreen key={tasksFilter} history={history} onOpenTask={handleOpenTask} initialFilter={tasksFilter} onFilterChange={setTasksFilter} />
           )}
           {currentScreen === 'history' && (
             <HistoryScreen history={history} onOpenTask={handleOpenTask} />
