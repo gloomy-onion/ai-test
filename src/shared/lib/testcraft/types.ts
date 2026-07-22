@@ -14,12 +14,21 @@ export interface Task {
   placeholder: string;
 }
 
+export interface FeedbackSection {
+  title: string;
+  score: number;
+  comment: string;
+}
+
 export interface HistoryEntry {
   taskId: number;
   taskTitle: string;
   score: number;
   xp: number;
   date: string;
+  attempt: number;
+  selfScore?: number;
+  prevBestScore?: number;
 }
 
 export interface FeedbackResult {
@@ -30,6 +39,7 @@ export interface FeedbackResult {
   good: string[];
   missing: string[];
   tips: string[];
+  sections?: FeedbackSection[];
 }
 
 export interface AIProvider {
@@ -65,3 +75,23 @@ export interface Badge {
   label: string;
   check: (done: number, history: HistoryEntry[], level: number) => boolean;
 }
+
+export type TaskCategory = 'functional' | 'api' | 'bug' | 'ui';
+
+export interface CategoryProgress {
+  category: TaskCategory;
+  categoryLabel: string;
+  total: number;
+  done: number;
+  bestScore: number;
+  avgScore: number;
+  xp: number;
+}
+
+export interface StreakInfo {
+  current: number;
+  longest: number;
+  todayDone: boolean;
+}
+
+

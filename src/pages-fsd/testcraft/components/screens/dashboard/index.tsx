@@ -2,7 +2,7 @@
 
 import { TASKS } from '@/shared/lib/testcraft/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/testcraft/types';
-import { getTotalXP, getLevelInfo } from '@/shared/lib/testcraft/xp-system';
+import { getTotalXP, getLevelInfo, getStreakInfo, getCategoryProgress } from '@/shared/lib/testcraft/xp-system';
 import { ProgressBar, StatCard, TaskCard } from '@/shared/ui';
 import styles from './styles.module.scss';
 
@@ -47,10 +47,22 @@ function buildMiniChart(entries: HistoryEntry[]): string {
 export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) => {
   const xp = getTotalXP(history);
   const lvl = getLevelInfo(xp);
-  const done = history.length;
-  const avg = done > 0 ? Math.round(history.reduce((s, h) => s + h.score, 0) / done) : null;
+  const bestByTask = new Map<number, HistoryEntry>();
+  for (const h of history) {
+    const prev = bestByTask.get(h.taskId);
+    if (!prev || h.score > prev.score) {
+      bestByTask.set(h.taskId, h);
+    }
+  }
+  const done = bestByTask.size;
+  const bestEntries = [...bestByTask.values()];
+  const avg = bestEntries.length > 0
+    ? Math.round(bestEntries.reduce((s, h) => s + h.score, 0) / bestEntries.length)
+    : null;
+  const streak = getStreakInfo(history);
+  const categoryProgress = getCategoryProgress(history);
   const featured = TASKS.slice(0, 4);
-  const last7 = history.slice(0, 7).reverse();
+  const last7 = bestEntries.slice(-7);
   const chartSVG = last7.length >= 2 ? buildMiniChart(last7) : '';
   const tasksWord = done === 1 ? 'задание' : done < 5 ? 'задания' : 'заданий';
 
@@ -59,7 +71,7 @@ export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) =
       <div className={styles.statsRow}>
         <StatCard value={done} label="Заданий выполнено" color="accent" />
         <StatCard value={avg ? `${avg}%` : '—'} label="Средний балл" color="accent2" />
-        <StatCard value={10} label="Доступно заданий" color="accent3" />
+        <StatCard value={TASKS.length} label="Доступно заданий" color="accent3" />
         <StatCard value={lvl.level} label="Уровень" color="success" />
       </div>
 
@@ -89,6 +101,11 @@ export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) =
                   📊 Среднее {avg}%
                 </span>
               ) : null}
+              {streak.current > 0 ? (
+                <span className={`${styles.streakBadge} ${styles.streakBadgeAccent2}`}>
+                  🔥 Серия: {streak.current} {streak.current === 1 ? 'день' : 'дня'}
+                </span>
+              ) : null}
             </div>
           </div>
           {chartSVG ? (
@@ -101,6 +118,21 @@ export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) =
             </div>
           )}
         </div>
+      </div>
+
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitle}>Прогресс по категориям</div>
+      </div>
+      <div className={styles.categoryMiniGrid}>
+        {categoryProgress.map((cat) => (
+          <div key={cat.category} className={styles.categoryMiniCard}>
+            <div className={styles.categoryMiniHeader}>
+              <span>{cat.categoryLabel}</span>
+              <span>{cat.done}/{cat.total}</span>
+            </div>
+            <ProgressBar value={cat.total > 0 ? Math.round((cat.done / cat.total) * 100) : 0} height="sm" />
+          </div>
+        ))}
       </div>
 
       <div className={styles.sectionHeader}>

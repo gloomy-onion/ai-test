@@ -85,3 +85,66 @@
   font-size: 14px;
   color: var(--text3);
 }
+
+.streakBanner {
+  text-align: center;
+  background: rgba(247, 179, 43, 0.1);
+  border: 1px solid rgba(247, 179, 43, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.completionBonusBanner {
+  text-align: center;
+  background: rgba(108, 99, 255, 0.1);
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.categoryCard {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.categoryCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.categoryCardLabel {
+  font-weight: 600;
+  flex: 1;
+}
+
+.categoryCardStats {
+  color: var(--text3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.categoryCardFooter {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text3);
+}

@@ -73,6 +73,34 @@
   color: var(--accent);
 }
 
+.streakBadgeAccent2 {
+  background: rgba(78, 205, 122, 0.1);
+  border-color: rgba(78, 205, 122, 0.3);
+  color: var(--accent3);
+}
+
+.categoryMiniGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.categoryMiniCard {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.categoryMiniHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: var(--text2);
+}
+
 .dashChart {
   flex-shrink: 0;
   opacity: 0.9;

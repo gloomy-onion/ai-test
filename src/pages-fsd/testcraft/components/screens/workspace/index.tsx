@@ -8,8 +8,9 @@ import {
   getProvider,
   getApiKey,
 } from '@/shared/lib/testcraft/ai-provider';
-import { loadDraft, saveDraft, hasDraft } from '@/shared/lib/testcraft/storage';
+import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@/shared/lib/testcraft/storage';
 import { TASKS, HINTS_MAP } from '@/shared/lib/testcraft/tasks-data';
+import { calculateRetryXP } from '@/shared/lib/testcraft/xp-system';
 import type { HistoryEntry, FeedbackResult } from '@/shared/lib/testcraft/types';
 import { Button, Spinner } from '@/shared/ui';
 import { FeedbackPanel } from '../../feedback';
@@ -38,6 +39,13 @@ export const WorkspaceScreen = ({
   const [hintText, setHintText] = useState('');
   const [hintLoading, setHintLoading] = useState(false);
   const [earnedXP, setEarnedXP] = useState(0);
+  const [selfScore, setSelfScore] = useState<number>(0);
+  const [showSelfAssess, setShowSelfAssess] = useState(false);
+  const [hasResult, setHasResult] = useState(false);
+
+  const attempt = getAttemptCount(history, taskId);
+  const prevBest = getBestScore(history, taskId);
+  const isRetry = attempt > 1;
 
   useEffect(() => {
     if (!task) {
@@ -48,6 +56,9 @@ export const WorkspaceScreen = ({
     setFeedback(null);
     setError('');
     setHintText('');
+    setSelfScore(0);
+    setShowSelfAssess(false);
+    setHasResult(false);
     if (hasDraft(task.id, task.template)) {
       showToast('Загружен сохранённый черновик');
     }
@@ -72,14 +83,12 @@ export const WorkspaceScreen = ({
     }
     if (answer.trim().length < 20) {
       showToast('Напишите что-нибудь перед проверкой 😊');
-
       return;
     }
     const prov = getProvider();
     if (prov !== 'claude' && !getApiKey()) {
       showToast('Добавьте API-ключ в Настройках API ⚙', 'var(--danger)');
       onBack();
-
       return;
     }
     setLoading(true);
@@ -87,9 +96,11 @@ export const WorkspaceScreen = ({
     try {
       const result = await callClaude(buildPrompt(task, answer));
       setFeedback(result);
-      const earned = Math.round((task.xp * result.score) / 100);
+      setHasResult(true);
+
+      const earned = calculateRetryXP(task.xp, result.score, prevBest?.score, attempt);
       setEarnedXP(earned);
-      const prev = history.find((h) => h.taskId === task.id);
+
       const entry: HistoryEntry = {
         taskId: task.id,
         taskTitle: task.title,
@@ -100,17 +111,25 @@ export const WorkspaceScreen = ({
           month: 'short',
           year: 'numeric',
         }),
+        attempt,
+        selfScore: selfScore > 0 ? selfScore : undefined,
+        prevBestScore: prevBest?.score,
       };
       onSaveResult(entry);
       onUpdateSidebar();
-      if (!prev || prev.score < result.score) {
+
+      if (prevBest && result.score > prevBest.score) {
+        showToast(`Улучшение! +${earned} XP 🎉`, 'var(--accent3)');
+      } else if (!prevBest) {
         showToast(`+${earned} XP заработано! 🎉`, 'var(--accent3)');
+      } else {
+        showToast('Результат не улучшен. Попробуйте ещё! 💪', 'var(--accent2)');
       }
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Не удалось получить ответ от AI.');
     }
     setLoading(false);
-  }, [task, answer, history, onBack, onSaveResult, onUpdateSidebar]);
+  }, [task, answer, prevBest, attempt, selfScore, onBack, onSaveResult, onUpdateSidebar]);
 
   const handleGetHint = useCallback(async () => {
     if (!task) {
@@ -165,6 +184,14 @@ export const WorkspaceScreen = ({
             <div className={styles.reqLabel}>Задание</div>
             <div className={styles.requirementText}>{task.desc}</div>
           </div>
+          {isRetry && prevBest && (
+            <div className={styles.requirementBlock}>
+              <div className={styles.reqLabel}>Прошлая попытка</div>
+              <div className={styles.requirementValue}>
+                Попытка #{attempt - 1} · {prevBest.score}% · {prevBest.date}
+              </div>
+            </div>
+          )}
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Требования</div>
             <div className={styles.requirementText}>{task.requirement}</div>
@@ -205,18 +232,41 @@ export const WorkspaceScreen = ({
           <span className={`${styles.wsPanelDot} ${styles.wsPanelDotAccent}`} />
           <span className={styles.wsPanelTitle}>Ваш ответ</span>
           <span className={styles.charCount}>
-            {chars} симв. · {lines} стр.
+            {chars} симв. · {lines} стр. · попытка #{isRetry ? attempt : 1}
           </span>
         </div>
         <div className={styles.wsPanelBodyColumn}>
           <textarea
             id="answerArea"
             className={styles.taskTextarea}
-            rows={20}
+            rows={16}
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder={task.placeholder}
           />
+
+          {!hasResult && !showSelfAssess && (
+            <div className={styles.selfAssessPrompt}>
+              <span className={styles.selfAssessLabel}>Оцените свою уверенность (опционально):</span>
+              <div className={styles.selfAssessStars}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <span
+                    key={n}
+                    className={`${styles.selfAssessStar} ${selfScore >= n ? styles.selfAssessStarActive : ''}`}
+                    onClick={() => {
+                      setSelfScore(selfScore === n ? 0 : n);
+                    }}
+                  >
+                    ★
+                  </span>
+                ))}
+                <span className={styles.selfAssessHint}>
+                  {selfScore > 0 ? `${selfScore}/5` : 'не указана'}
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={styles.wsActions}>
             <Button size="sm" onClick={handleGetHint} disabled={hintLoading}>
               💡 {hintLoading ? 'Загрузка...' : 'Подсказка'}
@@ -259,7 +309,15 @@ export const WorkspaceScreen = ({
                 <div className={styles.feedbackText}>{error}</div>
               </div>
             )}
-            {feedback && <FeedbackPanel data={feedback} earnedXP={earnedXP} onBack={onBack} />}
+            {feedback && (
+              <FeedbackPanel
+                data={feedback}
+                earnedXP={earnedXP}
+                selfScore={selfScore > 0 ? selfScore : undefined}
+                prevBestScore={prevBest?.score}
+                onBack={onBack}
+              />
+            )}
           </div>
         </div>
       </div>

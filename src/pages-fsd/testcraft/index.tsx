@@ -57,9 +57,8 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
 
   const handleSaveResult = useCallback((entry: HistoryEntry) => {
     setHistory((prev) => {
-      const updated = [entry, ...prev.filter((h) => h.taskId !== entry.taskId)];
+      const updated = [entry, ...prev];
       saveHistory(updated);
-
       return updated;
     });
   }, []);

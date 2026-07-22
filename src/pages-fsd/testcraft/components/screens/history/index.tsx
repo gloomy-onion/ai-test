@@ -26,11 +26,20 @@ export const HistoryScreen = ({ history, onOpenTask }: HistoryScreenProps) => {
     );
   }
 
+  const sorted = [...history].reverse();
+
   return (
     <>
       <div className={styles.sectionTitleLarge}>История выполнений</div>
-      {history.map((h) => (
-        <HistoryRow key={`${h.taskId}-${h.date}`} entry={h} onRepeat={onOpenTask} />
+      <div className={styles.historySubtitle}>
+        Всего попыток: {history.length} · Уникальных заданий: {new Set(history.map((h) => h.taskId)).size}
+      </div>
+      {sorted.map((h) => (
+        <HistoryRow
+          key={`${h.taskId}-${h.date}-${h.attempt}-${Math.random()}`}
+          entry={h}
+          onRepeat={onOpenTask}
+        />
       ))}
     </>
   );

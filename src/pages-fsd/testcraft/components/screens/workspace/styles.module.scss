@@ -221,3 +221,51 @@
 .feedbackSectionTitleError {
   color: var(--danger);
 }
+
+.selfAssessPrompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.selfAssessLabel {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+.selfAssessStars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.selfAssessStar {
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text3);
+  transition: color 0.15s;
+  user-select: none;
+}
+
+.selfAssessStar:hover {
+  color: var(--accent2);
+}
+
+.selfAssessStarActive {
+  color: var(--accent2);
+}
+
+.selfAssessHint {
+  font-size: 11px;
+  color: var(--text3);
+  margin-left: 6px;
+}
+
+.wsPanelDotAccent {
+  background: var(--accent);
+}
+
+.wsPanelDotAccent2 {
+  background: var(--accent2);
+}

@@ -1,4 +1,5 @@
 import type { AIProvider, FeedbackResult, Task } from './types';
+import { RUBRICS_MAP } from './tasks-data';
 
 export const PROVIDERS: Record<string, AIProvider> = {
   claude: {
@@ -72,6 +73,14 @@ export function removeApiKey(provider: string): void {
 }
 
 export function buildPrompt(task: Task, answer: string): string {
+  const rubric = RUBRICS_MAP[task.type];
+  const sectionsLabels: Record<string, string> = {
+    functional: 'Позитивные сценарии, Негативные сценарии, Граничные значения, Структура',
+    api: 'Успешные сценарии, Ошибки и коды ответов, Валидация параметров, Авторизация',
+    bug: 'Название и описание, Шаги воспроизведения, Ожидаемый vs Фактический результат, Окружение',
+    ui: 'Отображение, Адаптивность, Интерактивные состояния, Доступность',
+  };
+
   return `Ты опытный QA-наставник. Оцени работу начинающего тестировщика.
 
 ЗАДАНИЕ:
@@ -79,18 +88,29 @@ export function buildPrompt(task: Task, answer: string): string {
 Описание: ${task.desc}
 Требования к системе: ${task.requirement}
 
+КРИТЕРИИ ОЦЕНКИ (для типа "${task.typeLabel}"):
+${rubric}
+
 РАБОТА СТУДЕНТА:
 ${answer}
 
-Дай детальную оценку на русском языке. Ответь ТОЛЬКО в формате JSON (без markdown-обёртки):
+Дай детальную оценку на русском языке. Проанализируй каждый раздел работы отдельно.
+
+Ответь ТОЛЬКО в формате JSON (без markdown-обёртки):
 {
-  "score": число от 0 до 100,
-  "coverage": число от 0 до 100,
-  "quality": число от 0 до 100,
-  "summary": "краткий вывод 1-2 предложения",
+  "score": число от 0 до 100 (общий балл),
+  "coverage": число от 0 до 100 (насколько покрыты требования),
+  "quality": число от 0 до 100 (качество оформления),
+  "summary": "краткий вывод 1-2 предложения на русском",
   "good": ["что сделано хорошо, 2-4 пункта"],
   "missing": ["что пропущено или неверно, 2-5 пунктов"],
-  "tips": ["конкретные советы по улучшению, 2-3 пункта"]
+  "tips": ["конкретные советы по улучшению, 2-3 пункта"],
+  "sections": [
+    {"title": "${sectionsLabels[task.type]?.split(', ')[0] || 'Раздел 1'}", "score": число 0-100, "comment": "замечания по разделу"},
+    {"title": "${sectionsLabels[task.type]?.split(', ')[1] || 'Раздел 2'}", "score": число 0-100, "comment": "замечания по разделу"},
+    {"title": "${sectionsLabels[task.type]?.split(', ')[2] || 'Раздел 3'}", "score": число 0-100, "comment": "замечания по разделу"},
+    {"title": "${sectionsLabels[task.type]?.split(', ')[3] || 'Раздел 4'}", "score": число 0-100, "comment": "замечания по разделу"}
+  ]
 }`;
 }
 

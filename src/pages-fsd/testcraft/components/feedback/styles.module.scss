@@ -80,3 +80,60 @@
   content: '✗';
   color: var(--danger);
 }
+
+.improvementBanner {
+  text-align: center;
+  background: rgba(78, 205, 122, 0.08);
+  border: 1px solid rgba(78, 205, 122, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.selfAwarenessBanner {
+  text-align: center;
+  background: rgba(108, 99, 255, 0.08);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 13px;
+}
+
+.sectionsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionCard {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.sectionCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sectionCardTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.sectionCardScore {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.sectionCardComment {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
