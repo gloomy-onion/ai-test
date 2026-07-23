@@ -272,11 +272,18 @@ export async function getHint(task: Task, answer: string): Promise<string> {
 }
 
 export async function getIdealAnswer(task: Task): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+  const provId = getProvider();
+  const prov = PROVIDERS[provId];
+  const key = getApiKey();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+
+  let body: string;
+  if (provId === 'claude') {
+    if (key) {
+      headers['x-api-key'] = key;
+    }
+    body = JSON.stringify({
+      model: prov.model,
       max_tokens: 2000,
       messages: [
         {
@@ -291,14 +298,50 @@ export async function getIdealAnswer(task: Task): Promise<string> {
 Напиши полный, подробный, правильно оформленный эталонный ответ. Используй подходящий формат (чек-лист, тест-кейсы, баг-репорт). Отвечай на русском языке. Не добавляй комментариев и пояснений — только сам эталонный ответ.`,
         },
       ],
-    }),
-  });
-  const data = await response.json();
+    });
+  } else {
+    if (!key) {
+      throw new Error('Добавьте API-ключ в Настройках API');
+    }
+    headers.Authorization = `Bearer ${key}`;
+    body = JSON.stringify({
+      model: prov.model,
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: `Ты опытный QA-наставник. Покажи эталонный/идеальный ответ на задание для начинающего тестировщика.
 
-  return data.content
-    .map((c: { text?: string }) => c.text || '')
-    .join('')
-    .trim();
+ЗАДАНИЕ:
+Тип документа: ${task.docLabel}
+Описание: ${task.desc}
+Требования к системе: ${task.requirement}
+
+Напиши полный, подробный, правильно оформленный эталонный ответ. Используй подходящий формат (чек-лист, тест-кейсы, баг-репорт). Отвечай на русском языке. Не добавляй комментариев и пояснений — только сам эталонный ответ.` }],
+    });
+  }
+
+  const response = await fetch(prov.url, { method: 'POST', headers, body });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    const msg =
+      (err as { error?: { message?: string }; message?: string })?.error?.message ||
+      (err as { message?: string })?.message ||
+      response.status;
+    if (response.status === 401) {
+      throw new Error('Неверный API-ключ. Проверьте Настройки API.');
+    }
+    if (response.status === 429) {
+      throw new Error('Превышен лимит запросов. Попробуйте позже.');
+    }
+    throw new Error(`Ошибка API: ${msg}`);
+  }
+
+  const data = await response.json();
+  const text: string =
+    provId === 'claude'
+      ? data.content.map((c: { text?: string }) => c.text || '').join('')
+      : data.choices?.[0]?.message?.content || '';
+
+  return text.trim();
 }
 
 export function scoreColor(n: number): string {
