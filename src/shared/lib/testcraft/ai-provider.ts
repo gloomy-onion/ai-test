@@ -271,6 +271,36 @@ export async function getHint(task: Task, answer: string): Promise<string> {
     .trim();
 }
 
+export async function getIdealAnswer(task: Task): Promise<string> {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      messages: [
+        {
+          role: 'user',
+          content: `Ты опытный QA-наставник. Покажи эталонный/идеальный ответ на задание для начинающего тестировщика.
+
+ЗАДАНИЕ:
+Тип документа: ${task.docLabel}
+Описание: ${task.desc}
+Требования к системе: ${task.requirement}
+
+Напиши полный, подробный, правильно оформленный эталонный ответ. Используй подходящий формат (чек-лист, тест-кейсы, баг-репорт). Отвечай на русском языке. Не добавляй комментариев и пояснений — только сам эталонный ответ.`,
+        },
+      ],
+    }),
+  });
+  const data = await response.json();
+
+  return data.content
+    .map((c: { text?: string }) => c.text || '')
+    .join('')
+    .trim();
+}
+
 export function scoreColor(n: number): string {
   if (n >= 80) {
     return 'score-green';

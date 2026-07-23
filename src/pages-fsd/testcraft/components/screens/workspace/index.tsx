@@ -5,6 +5,7 @@ import {
   callClaude,
   buildPrompt,
   getHint,
+  getIdealAnswer,
   getProvider,
   getApiKey,
 } from '@/shared/lib/testcraft/ai-provider';
@@ -38,6 +39,8 @@ export const WorkspaceScreen = ({
   const [error, setError] = useState('');
   const [hintText, setHintText] = useState('');
   const [hintLoading, setHintLoading] = useState(false);
+  const [idealAnswer, setIdealAnswer] = useState('');
+  const [idealAnswerLoading, setIdealAnswerLoading] = useState(false);
   const [earnedXP, setEarnedXP] = useState(0);
   const [selfScore, setSelfScore] = useState<number>(0);
   const [showSelfAssess, setShowSelfAssess] = useState(false);
@@ -57,6 +60,7 @@ export const WorkspaceScreen = ({
     setFeedback(null);
     setError('');
     setHintText('');
+    setIdealAnswer('');
     setSelfScore(0);
     setShowSelfAssess(false);
     setHasResult(false);
@@ -145,6 +149,20 @@ export const WorkspaceScreen = ({
     }
     setHintLoading(false);
   }, [task, answer]);
+
+  const handleIdealAnswer = useCallback(async () => {
+    if (!task) {
+      return;
+    }
+    setIdealAnswerLoading(true);
+    try {
+      const text = await getIdealAnswer(task);
+      setIdealAnswer(text);
+    } catch {
+      setIdealAnswer('Не удалось получить эталонный ответ.');
+    }
+    setIdealAnswerLoading(false);
+  }, [task]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -281,6 +299,9 @@ export const WorkspaceScreen = ({
             <Button size="sm" onClick={handleGetHint} disabled={hintLoading}>
               💡 {hintLoading ? 'Загрузка...' : 'Подсказка'}
             </Button>
+            <Button size="sm" onClick={handleIdealAnswer} disabled={idealAnswerLoading}>
+              ★ {idealAnswerLoading ? 'Загрузка...' : 'Эталон'}
+            </Button>
             <Button
               variant="primary"
               size="sm"
@@ -301,6 +322,18 @@ export const WorkspaceScreen = ({
                 </span>
               </div>
               <div className={styles.hintPanelBody}>{hintText}</div>
+            </div>
+          )}
+
+          {idealAnswer && (
+            <div className={styles.idealAnswerPanel}>
+              <div className={styles.idealAnswerHeader}>
+                <span>★ Эталонный ответ</span>
+                <span className={styles.closeHint} onClick={() => setIdealAnswer('')}>
+                  ✕
+                </span>
+              </div>
+              <div className={styles.idealAnswerBody}>{idealAnswer}</div>
             </div>
           )}
 
