@@ -40,6 +40,7 @@ export const WorkspaceScreen = ({
   const [hintText, setHintText] = useState('');
   const [hintLoading, setHintLoading] = useState(false);
   const [idealAnswer, setIdealAnswer] = useState('');
+  const [showIdealAnswer, setShowIdealAnswer] = useState(false);
   const [idealAnswerLoading, setIdealAnswerLoading] = useState(false);
   const [earnedXP, setEarnedXP] = useState(0);
   const [selfScore, setSelfScore] = useState<number>(0);
@@ -61,6 +62,7 @@ export const WorkspaceScreen = ({
     setError('');
     setHintText('');
     setIdealAnswer('');
+    setShowIdealAnswer(false);
     setSelfScore(0);
     setShowSelfAssess(false);
     setHasResult(false);
@@ -154,15 +156,21 @@ export const WorkspaceScreen = ({
     if (!task) {
       return;
     }
+    if (idealAnswer) {
+      setShowIdealAnswer(true);
+      return;
+    }
     setIdealAnswerLoading(true);
     try {
       const text = await getIdealAnswer(task);
       setIdealAnswer(text);
+      setShowIdealAnswer(true);
     } catch {
       setIdealAnswer('Не удалось получить эталонный ответ.');
+      setShowIdealAnswer(true);
     }
     setIdealAnswerLoading(false);
-  }, [task]);
+  }, [task, idealAnswer]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -325,11 +333,11 @@ export const WorkspaceScreen = ({
             </div>
           )}
 
-          {idealAnswer && (
+          {showIdealAnswer && idealAnswer && (
             <div className={styles.idealAnswerPanel}>
               <div className={styles.idealAnswerHeader}>
                 <span>★ Эталонный ответ</span>
-                <span className={styles.closeHint} onClick={() => setIdealAnswer('')}>
+                <span className={styles.closeHint} onClick={() => setShowIdealAnswer(false)}>
                   ✕
                 </span>
               </div>
