@@ -249,26 +249,57 @@ export async function askTheoryQuestion(q: string): Promise<string> {
 }
 
 export async function getHint(task: Task, answer: string): Promise<string> {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      messages: [
-        {
-          role: 'user',
-          content: `Задание: ${task.desc}\nТип документа: ${task.docLabel}\nТребования: ${task.requirement}\n\nТекущий ответ студента:\n${answer || '(пусто)'}\n\nДай краткую подсказку (не решение!): что стоит добавить или проверить? 3-4 предложения на русском.`,
-        },
-      ],
-    }),
-  });
-  const data = await response.json();
+  const provId = getProvider();
+  const prov = PROVIDERS[provId];
+  const key = getApiKey();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
-  return data.content
-    .map((c: { text?: string }) => c.text || '')
-    .join('')
-    .trim();
+  const prompt = `Задание: ${task.desc}\nТип документа: ${task.docLabel}\nТребования: ${task.requirement}\n\nТекущий ответ студента:\n${answer || '(пусто)'}\n\nДай краткую подсказку (не решение!): что стоит добавить или проверить? 3-4 предложения на русском.`;
+
+  let body: string;
+  if (provId === 'claude') {
+    if (key) {
+      headers['x-api-key'] = key;
+    }
+    body = JSON.stringify({
+      model: prov.model,
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+  } else {
+    if (!key) {
+      throw new Error('Добавьте API-ключ в Настройках API');
+    }
+    headers.Authorization = `Bearer ${key}`;
+    body = JSON.stringify({
+      model: prov.model,
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }],
+    });
+  }
+
+  const response = await fetch(prov.url, { method: 'POST', headers, body });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    const msg =
+      (err as { error?: { message?: string }; message?: string })?.error?.message ||
+      (err as { message?: string })?.message ||
+      response.status;
+    if (response.status === 401) {
+      throw new Error('Неверный API-ключ. Проверьте Настройки API.');
+    }
+    if (response.status === 429) {
+      throw new Error('Превышен лимит запросов. Попробуйте позже.');
+    }
+    throw new Error(`Ошибка API: ${msg}`);
+  }
+
+  const data = await response.json();
+  return (provId === 'claude'
+    ? data.content.map((c: { text?: string }) => c.text || '').join('')
+    : data.choices?.[0]?.message?.content || ''
+  ).trim();
 }
 
 export async function getIdealAnswer(task: Task): Promise<string> {
