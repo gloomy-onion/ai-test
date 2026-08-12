@@ -22,6 +22,9 @@ class MyDocument extends Document<ExtendedDocumentProps> {
     return (
       <Html lang="en">
         <Head nonce={nonce}>
+          <title>TestCraft AI — QA Learning Platform</title>
+          <meta name="description" content="Платформа для практики тестирования с AI-проверкой заданий" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
