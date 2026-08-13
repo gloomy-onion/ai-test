@@ -26,13 +26,20 @@ const isBrowser = typeof window !== 'undefined' && typeof HTMLElement !== 'undef
 
 if (isBrowser) {
   class BadgePillElement extends HTMLElement {
+    private static readonly styles = (() => {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(STYLES);
+      return sheet;
+    })();
+
     public connectedCallback(): void {
       if (this.shadowRoot) {
         return;
       }
 
       const shadow = this.attachShadow({ mode: 'open' });
-      shadow.innerHTML = `<style>${STYLES}</style><slot></slot>`;
+      shadow.adoptedStyleSheets = [BadgePillElement.styles];
+      shadow.innerHTML = '<slot></slot>';
     }
   }
 

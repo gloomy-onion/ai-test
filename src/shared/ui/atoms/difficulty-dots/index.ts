@@ -24,9 +24,16 @@ if (isBrowser) {
   class DifficultyDotsElement extends HTMLElement {
     public static observedAttributes = ['level', 'max'];
 
+    private static readonly styles = (() => {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(STYLES);
+      return sheet;
+    })();
+
     public connectedCallback(): void {
       if (!this.shadowRoot) {
-        this.attachShadow({ mode: 'open' });
+        const shadow = this.attachShadow({ mode: 'open' });
+        shadow.adoptedStyleSheets = [DifficultyDotsElement.styles];
       }
 
       this.render();
@@ -47,7 +54,7 @@ if (isBrowser) {
       }).join('');
 
       if (this.shadowRoot) {
-        this.shadowRoot.innerHTML = `<style>${STYLES}</style>${dots}`;
+        this.shadowRoot.innerHTML = dots;
       }
     }
   }

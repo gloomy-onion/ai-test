@@ -4,8 +4,9 @@ import { TASKS } from '@/shared/lib/testcraft/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/testcraft/types';
 import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/testcraft/xp-system';
 import { BADGES, CATEGORY_ICONS } from '@/shared/lib/testcraft/badges-data';
-import { Button, ProgressBar, HistoryRow, StatCard } from '@/shared/ui';
+import { Button, HistoryRow, StatCard } from '@/shared/ui';
 import '@/shared/ui/atoms/badge-pill';
+import '@/shared/ui/atoms/progress-bar';
 import styles from './styles.module.scss';
 
 interface ProfileScreenProps {
@@ -55,7 +56,7 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
         <span>Прогресс уровня</span>
         <span>{lvl.pct}%</span>
       </div>
-      <ProgressBar value={lvl.pct} height="md" className={styles.profileProgress} />
+      <progress-bar value={lvl.pct} height="md" class={styles.profileProgress} />
 
       {streak.current > 0 && (
         <div className={styles.streakBanner}>
@@ -82,7 +83,7 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
                   {cat.done}/{cat.total}
                 </span>
               </div>
-              <ProgressBar value={cat.total > 0 ? Math.round((cat.done / cat.total) * 100) : 0} height="sm" />
+              <progress-bar value={cat.total > 0 ? Math.round((cat.done / cat.total) * 100) : 0} height="sm" />
               <div className={styles.categoryCardFooter}>
                 <span>Ур. {catLevel.level}</span>
                 <span>{cat.done > 0 ? `${cat.avgScore}%` : '—'}</span>

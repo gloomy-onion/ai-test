@@ -13,6 +13,12 @@ declare module 'react' {
         level?: number | string;
         max?: number | string;
       };
+      'progress-bar': {
+        key?: React.Key;
+        class?: string;
+        value?: number;
+        height?: 'sm' | 'md' | 'lg';
+      }
     }
   }
 }
