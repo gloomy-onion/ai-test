@@ -1,10 +1,8 @@
 export {
   Button,
   LoadingState,
-  BadgePill,
   Markdown,
   Spinner,
-  DifficultyDots,
   ProgressBar,
   ScoreCircle,
 } from './atoms';

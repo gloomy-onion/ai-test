@@ -3,7 +3,9 @@
 import { TASKS } from '@/shared/lib/testcraft/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/testcraft/types';
 import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/testcraft/xp-system';
-import { BadgePill, Button, ProgressBar, HistoryRow, StatCard } from '@/shared/ui';
+import { BADGES, CATEGORY_ICONS } from '@/shared/lib/testcraft/badges-data';
+import { Button, ProgressBar, HistoryRow, StatCard } from '@/shared/ui';
+import '@/shared/ui/atoms/badge-pill';
 import styles from './styles.module.scss';
 
 interface ProfileScreenProps {
@@ -11,57 +13,6 @@ interface ProfileScreenProps {
   onOpenTask: (id: number) => void;
   onClearHistory: () => void;
 }
-
-const CATEGORY_ICONS: Record<string, string> = {
-  functional: '🧪',
-  api: '🔌',
-  bug: '🐛',
-  ui: '🎨',
-};
-
-const BADGES = [
-  { id: 'first', icon: '🎯', label: 'Первый шаг', check: (done: number) => done >= 1 },
-  { id: 'five', icon: '🏅', label: '5 заданий', check: (done: number) => done >= 5 },
-  { id: 'ten', icon: '🏆', label: '10 заданий', check: (done: number) => done >= 10 },
-  {
-    id: 'perfect',
-    icon: '⭐',
-    label: 'Отличник (90+)',
-    check: (_done: number, _hist: HistoryEntry[]) => _hist.some((h) => h.score >= 90),
-  },
-  {
-    id: 'improve',
-    icon: '📈',
-    label: 'Прогресс',
-    check: (_done: number, _hist: HistoryEntry[]) => _hist.length >= 2,
-  },
-  {
-    id: 'api',
-    icon: '🔌',
-    label: 'API-тестировщик',
-    check: (_done: number, _hist: HistoryEntry[]) =>
-      _hist.some((h) => {
-        const t = TASKS.find((x) => x.id === h.taskId);
-        return t?.type === 'api';
-      }),
-  },
-  {
-    id: 'bug',
-    icon: '🐛',
-    label: 'Охотник за багами',
-    check: (_done: number, _hist: HistoryEntry[]) =>
-      _hist.some((h) => {
-        const t = TASKS.find((x) => x.id === h.taskId);
-        return t?.type === 'bug';
-      }),
-  },
-  {
-    id: 'level3',
-    icon: '🚀',
-    label: 'QA Engineer',
-    check: (_done: number, _hist: HistoryEntry[], _lvl: number) => _lvl >= 3,
-  },
-];
 
 export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileScreenProps) => {
   const xp = getTotalXP(history);
@@ -157,11 +108,11 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
           const earned = b.check(done, history, lvl.level);
 
           return (
-            <BadgePill key={b.id} earned={earned}>
+            <badge-pill key={b.id} earned={earned ? '' : undefined}>
               <span>{b.icon}</span>
               <span>{b.label}</span>
               {!earned && <span className={styles.badgeLock}>🔒</span>}
-            </BadgePill>
+            </badge-pill>
           );
         })}
       </div>

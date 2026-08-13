@@ -1,7 +1,7 @@
 'use client';
 
 import type { Task, HistoryEntry } from '@/shared/lib/testcraft/types';
-import { DifficultyDots } from '@/shared/ui/atoms';
+import '@/shared/ui/atoms/difficulty-dots';
 import styles from './styles.module.scss';
 
 interface TaskCardProps {
@@ -38,7 +38,7 @@ export const TaskCard = ({ task, history, onOpen }: TaskCardProps) => {
       {isSolved && <div className={styles.solvedRibbon}>✓</div>}
       <div className={styles.meta}>
         <span className={`${styles.type} ${TYPE_CLASS[task.type] || ''}`}>{task.typeLabel}</span>
-        <DifficultyDots level={task.difficulty} />
+        <difficulty-dots level={task.difficulty} />
         {isSolved && (
           <span className={styles.solvedPill}>
             ✓ {best.score}%
