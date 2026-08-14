@@ -16,7 +16,7 @@ export const HistoryRow = ({ entry, onRepeat }: HistoryRowProps) => {
 
   return (
     <div className={styles.row}>
-      <ScoreCircle score={entry.score} />
+      <score-circle score={entry.score} />
       <div className={styles.info}>
         <div className={styles.taskName}>{entry.taskTitle}</div>
         <div className={styles.date}>

@@ -8,7 +8,7 @@ interface ScoreCardProps {
   label: string;
 }
 
-function colorClass(n: number): string {
+const colorClass = (n: number): string => {
   if (n >= 80) {
     return styles.green;
   }
@@ -17,7 +17,7 @@ function colorClass(n: number): string {
   }
 
   return styles.red;
-}
+};
 
 export const ScoreCard = ({ value, suffix = '', label }: ScoreCardProps) => (
   <div className={styles.card}>
