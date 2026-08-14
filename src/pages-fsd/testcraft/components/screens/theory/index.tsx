@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { askTheoryQuestion } from '@/shared/lib/testcraft/ai-provider';
-import { THEORY_TOPICS } from '@/shared/lib/testcraft/tasks-data';
+import { askTheoryQuestion } from '@/shared/lib/helpers/ai-provider';
+import { THEORY_TOPICS } from '@/shared/lib/helpers/tasks-data';
 import { Button, ChatBubble } from '@/shared/ui';
 import styles from './styles.module.scss';
 

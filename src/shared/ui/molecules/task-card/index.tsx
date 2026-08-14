@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, HistoryEntry } from '@/shared/lib/testcraft/types';
+import type { Task, HistoryEntry } from '@/shared/lib/helpers/types';
 import '@/shared/ui/atoms/difficulty-dots';
 import styles from './styles.module.scss';
 

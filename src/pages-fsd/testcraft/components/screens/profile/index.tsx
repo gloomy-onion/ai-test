@@ -1,9 +1,9 @@
 'use client';
 
-import { TASKS } from '@/shared/lib/testcraft/tasks-data';
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
-import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/testcraft/xp-system';
-import { BADGES, CATEGORY_ICONS } from '@/shared/lib/testcraft/badges-data';
+import { TASKS } from '@/shared/lib/helpers/tasks-data';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/helpers/xp-system';
+import { BADGES, CATEGORY_ICONS } from '@/shared/lib/helpers/badges-data';
 import { Button, HistoryRow, StatCard } from '@/shared/ui';
 import '@/shared/ui/atoms/badge-pill';
 import '@/shared/ui/atoms/progress-bar';

@@ -18,7 +18,12 @@ declare module 'react' {
         class?: string;
         value?: number;
         height?: 'sm' | 'md' | 'lg';
-      }
+      };
+      'markdown-renderer': {
+        key?: React.Key;
+        class?: string;
+        text?: string;
+      };
     }
   }
 }

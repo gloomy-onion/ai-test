@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { TASKS } from '@/shared/lib/testcraft/tasks-data';
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
+import { TASKS } from '@/shared/lib/helpers/tasks-data';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { TaskCard } from '@/shared/ui';
 import styles from './styles.module.scss';
 

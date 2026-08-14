@@ -1,6 +1,6 @@
 'use client';
 
-import type { FeedbackResult } from '@/shared/lib/testcraft/types';
+import type { FeedbackResult } from '@/shared/lib/helpers/types';
 import { Button, ScoreCard } from '@/shared/ui';
 import styles from './styles.module.scss';
 

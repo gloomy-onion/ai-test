@@ -9,7 +9,7 @@ import {
   setApiKey,
   removeApiKey,
   testApiConnection,
-} from '@/shared/lib/testcraft/ai-provider';
+} from '@/shared/lib/helpers/ai-provider';
 import { Button } from '@/shared/ui';
 import styles from './styles.module.scss';
 

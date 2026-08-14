@@ -1,6 +1,6 @@
 'use client';
 
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { Button, ScoreCircle } from '@/shared/ui/atoms';
 import styles from './styles.module.scss';
 

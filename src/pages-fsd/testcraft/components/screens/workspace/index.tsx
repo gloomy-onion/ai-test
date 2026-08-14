@@ -8,12 +8,13 @@ import {
   getIdealAnswer,
   getProvider,
   getApiKey,
-} from '@/shared/lib/testcraft/ai-provider';
-import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@/shared/lib/testcraft/storage';
-import { TASKS, HINTS_MAP } from '@/shared/lib/testcraft/tasks-data';
-import { calculateRetryXP } from '@/shared/lib/testcraft/xp-system';
-import type { HistoryEntry, FeedbackResult } from '@/shared/lib/testcraft/types';
-import { Button, Spinner, Markdown } from '@/shared/ui';
+} from '@/shared/lib/helpers/ai-provider';
+import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@/shared/lib/helpers/storage';
+import { TASKS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
+import { calculateRetryXP } from '@/shared/lib/helpers/xp-system';
+import type { HistoryEntry, FeedbackResult } from '@/shared/lib/helpers/types';
+import { Button, Spinner } from '@/shared/ui';
+import '@/shared/ui/atoms/markdown';
 import { FeedbackPanel } from '../../feedback';
 import styles from './styles.module.scss';
 
@@ -221,7 +222,7 @@ export const WorkspaceScreen = ({
           )}
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Требования</div>
-            <Markdown className={styles.requirementText}>{task.requirement}</Markdown>
+            <markdown-renderer class={styles.requirementText} text={task.requirement}></markdown-renderer>
           </div>
           <div className={styles.hintsWrap}>
             <div className={`${styles.reqLabel} ${styles.hintsLabel}`}>
@@ -265,7 +266,7 @@ export const WorkspaceScreen = ({
         <div className={styles.wsPanelBodyColumn}>
           {preview ? (
             <div className={styles.previewArea}>
-              <Markdown className={styles.previewMarkdown}>{answer || '*Начните писать ответ...*'}</Markdown>
+              <markdown-renderer class={styles.previewMarkdown} text={answer || '*Начните писать ответ...*'}></markdown-renderer>
             </div>
           ) : (
             <textarea

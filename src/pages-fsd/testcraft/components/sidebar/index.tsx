@@ -1,8 +1,8 @@
 'use client';
 
-import { TASKS } from '@/shared/lib/testcraft/tasks-data';
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
-import { getTotalXP, getLevelInfo } from '@/shared/lib/testcraft/xp-system';
+import { TASKS } from '@/shared/lib/helpers/tasks-data';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { getTotalXP, getLevelInfo } from '@/shared/lib/helpers/xp-system';
 import styles from './styles.module.scss';
 
 interface SidebarProps {

@@ -1,6 +1,6 @@
 'use client';
 
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { HistoryRow } from '@/shared/ui';
 import styles from './styles.module.scss';
 

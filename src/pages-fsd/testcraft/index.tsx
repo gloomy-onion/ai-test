@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { loadHistory, saveHistory } from '@/shared/lib/testcraft/storage';
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
+import { loadHistory, saveHistory } from '@/shared/lib/helpers/storage';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { Header } from './components/header';
 import { DashboardScreen } from './components/screens/dashboard';
 import { HistoryScreen } from './components/screens/history';

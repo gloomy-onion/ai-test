@@ -1,9 +1,9 @@
 'use client';
 
-import { TASKS } from '@/shared/lib/testcraft/tasks-data';
-import type { HistoryEntry } from '@/shared/lib/testcraft/types';
-import { getTotalXP, getLevelInfo, getStreakInfo, getCategoryProgress } from '@/shared/lib/testcraft/xp-system';
-import { buildMiniChart } from '@/shared/lib/testcraft/mini-chart';
+import { TASKS } from '@/shared/lib/helpers/tasks-data';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { getTotalXP, getLevelInfo, getStreakInfo, getCategoryProgress } from '@/shared/lib/helpers/xp-system';
+import { buildMiniChart } from '@/shared/lib/helpers/mini-chart';
 import {StatCard, TaskCard} from '@/shared/ui';
 import '@/shared/ui/atoms/progress-bar';
 import styles from './styles.module.scss';
