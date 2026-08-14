@@ -13,7 +13,7 @@ import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@
 import { TASKS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
 import { calculateRetryXP } from '@/shared/lib/helpers/xp-system';
 import type { HistoryEntry, FeedbackResult } from '@/shared/lib/helpers/types';
-import { Button, Spinner } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 import '@/shared/ui/atoms/markdown';
 import { FeedbackPanel } from '../../feedback';
 import styles from './styles.module.scss';
@@ -349,7 +349,7 @@ export const WorkspaceScreen = ({
           <div id="feedbackArea">
             {loading && (
               <div className={styles.loadingState}>
-                <Spinner />
+                <spinner-element />
                 <div>AI-наставник анализирует вашу работу...</div>
               </div>
             )}

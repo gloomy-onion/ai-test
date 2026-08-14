@@ -29,6 +29,11 @@ declare module 'react' {
         class?: string;
         score?: number;
       }
+      'spinner-element': {
+        key?: React.Key;
+        class?: string;
+        size?: 'sm' | 'md';
+      }
     }
   }
 }
