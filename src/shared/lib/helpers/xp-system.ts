@@ -23,7 +23,7 @@ export const LEVELS: Level[] = [
   { level: 5, title: 'QA Lead', xpNeeded: 2000 },
 ];
 
-export function getBestPerTask(history: HistoryEntry[]): Map<number, HistoryEntry> {
+export const getBestPerTask = (history: HistoryEntry[]): Map<number, HistoryEntry> => {
   const best = new Map<number, HistoryEntry>();
   for (const h of history) {
     const prev = best.get(h.taskId);
@@ -32,9 +32,9 @@ export function getBestPerTask(history: HistoryEntry[]): Map<number, HistoryEntr
     }
   }
   return best;
-}
+};
 
-export function getTotalXP(history: HistoryEntry[]): number {
+export const getTotalXP = (history: HistoryEntry[]): number => {
   const byTask = getBestPerTask(history);
   let total = 0;
   for (const h of byTask.values()) {
@@ -44,9 +44,9 @@ export function getTotalXP(history: HistoryEntry[]): number {
     }
   }
   return total;
-}
+};
 
-export function getLevelInfo(xp: number): LevelInfo {
+export const getLevelInfo = (xp: number): LevelInfo => {
   let lvl = LEVELS[0];
   for (const l of LEVELS) {
     if (xp >= l.xpNeeded) {
@@ -60,9 +60,9 @@ export function getLevelInfo(xp: number): LevelInfo {
   const pct = next ? Math.round(((xp - lvl.xpNeeded) / (next.xpNeeded - lvl.xpNeeded)) * 100) : 100;
 
   return { ...lvl, next, xp, pct };
-}
+};
 
-export function getCategoryProgress(history: HistoryEntry[]): CategoryProgress[] {
+export const getCategoryProgress = (history: HistoryEntry[]): CategoryProgress[] => {
   return CATEGORIES.map(({ key, label }) => {
     const tasks = TASKS.filter((t) => t.type === key);
     const categoryEntries = history.filter((h) => {
@@ -87,9 +87,9 @@ export function getCategoryProgress(history: HistoryEntry[]): CategoryProgress[]
 
     return { category: key, categoryLabel: label, total: tasks.length, done, bestScore, avgScore, xp };
   });
-}
+};
 
-export function getCategoryLevelInfo(categoryXp: number): LevelInfo {
+export const getCategoryLevelInfo = (categoryXp: number): LevelInfo => {
   let lvl = CATEGORY_LEVELS[0];
   for (const l of CATEGORY_LEVELS) {
     if (categoryXp >= l.xpNeeded) {
@@ -105,9 +105,9 @@ export function getCategoryLevelInfo(categoryXp: number): LevelInfo {
     : 100;
 
   return { ...lvl, next, xp: categoryXp, pct };
-}
+};
 
-export function getStreakInfo(history: HistoryEntry[]): StreakInfo {
+export const getStreakInfo = (history: HistoryEntry[]): StreakInfo => {
   const dates = new Set<string>();
   for (const h of history) {
     const d = h.date;
@@ -161,9 +161,9 @@ export function getStreakInfo(history: HistoryEntry[]): StreakInfo {
   }
 
   return { current, longest, todayDone };
-}
+};
 
-export function getCategoryCompletionBonus(history: HistoryEntry[]): number {
+export const getCategoryCompletionBonus = (history: HistoryEntry[]): number => {
   const progress = getCategoryProgress(history);
   let bonus = 0;
   for (const cat of progress) {
@@ -172,9 +172,9 @@ export function getCategoryCompletionBonus(history: HistoryEntry[]): number {
     }
   }
   return bonus;
-}
+};
 
-export function calculateRetryXP(taskXp: number, newScore: number, prevScore: number | undefined, attempt: number): number {
+export const calculateRetryXP = (taskXp: number, newScore: number, prevScore: number | undefined, attempt: number): number => {
   const earned = Math.round((taskXp * newScore) / 100);
   if (!prevScore) {
     return earned;
@@ -186,4 +186,4 @@ export function calculateRetryXP(taskXp: number, newScore: number, prevScore: nu
   const improvement = earned - prevEarned;
   const retryFactor = attempt <= 2 ? 1 : Math.max(0.3, 1 - (attempt - 2) * 0.2);
   return Math.round(improvement * retryFactor);
-}
+};

@@ -1,6 +1,6 @@
 import type { HistoryEntry } from './types';
 
-export function buildMiniChart(entries: HistoryEntry[]): string {
+export const buildMiniChart = (entries: HistoryEntry[]): string => {
   const W = 160;
   const H = 68;
   const P = 8;
@@ -31,4 +31,4 @@ export function buildMiniChart(entries: HistoryEntry[]): string {
     <text x="${Math.min(lx + 5, W - 20)}" y="${Math.max(ly - 5, 10)}" font-size="9" fill="${col}" font-family="monospace" font-weight="600">${scores[n - 1]}</text>
     <text x="${P}" y="${H - 1}" font-size="9" fill="#555a70" font-family="monospace">последние ${n}</text>
   </svg>`;
-}
+};

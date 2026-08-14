@@ -24,6 +24,11 @@ declare module 'react' {
         class?: string;
         text?: string;
       };
+      'score-circle': {
+        key?: React.Key;
+        class?: string;
+        score?: number;
+      }
     }
   }
 }

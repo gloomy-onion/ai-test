@@ -9,7 +9,7 @@ const DEFAULT_ENTRY: Partial<HistoryEntry> = {
   prevBestScore: undefined,
 };
 
-export function loadHistory(): HistoryEntry[] {
+export const loadHistory = (): HistoryEntry[] => {
   if (typeof window === 'undefined') {
     return [];
   }
@@ -19,42 +19,42 @@ export function loadHistory(): HistoryEntry[] {
   } catch {
     return [];
   }
-}
+};
 
-export function saveHistory(history: HistoryEntry[]): void {
+export const saveHistory = (history: HistoryEntry[]): void => {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-}
+};
 
-export function loadDraft(taskId: number | null, defaultTemplate: string): string {
+export const loadDraft = (taskId: number | null, defaultTemplate: string): string => {
   if (!taskId || typeof window === 'undefined') {
     return defaultTemplate;
   }
 
   return localStorage.getItem(`${DRAFT_PREFIX}${taskId}`) || defaultTemplate;
-}
+};
 
-export function saveDraft(taskId: number | null, value: string): void {
+export const saveDraft = (taskId: number | null, value: string): void => {
   if (!taskId || typeof window === 'undefined') {
     return;
   }
   localStorage.setItem(`${DRAFT_PREFIX}${taskId}`, value);
-}
+};
 
-export function hasDraft(taskId: number, template: string): boolean {
+export const hasDraft = (taskId: number, template: string): boolean => {
   if (typeof window === 'undefined') {
     return false;
   }
   const draft = localStorage.getItem(`${DRAFT_PREFIX}${taskId}`);
 
   return !!draft && draft !== template;
-}
+};
 
-export function getAttemptCount(history: HistoryEntry[], taskId: number): number {
+export const getAttemptCount = (history: HistoryEntry[], taskId: number): number => {
   return history.filter((h) => h.taskId === taskId).length + 1;
-}
+};
 
-export function getBestScore<T extends HistoryEntry>(history: T[], taskId: number): T | undefined {
+export const getBestScore = <T extends HistoryEntry>(history: T[], taskId: number): T | undefined => {
   const entries = history.filter((h) => h.taskId === taskId);
   if (!entries.length) return undefined;
   return entries.reduce((best, h) => (h.score > best.score ? h : best));
-}
+};

@@ -15,10 +15,10 @@ interface SidebarProps {
   activeFilter?: string;
 }
 
-function getRemainingTasks(history: HistoryEntry[]): number {
+const getRemainingTasks = (history: HistoryEntry[]): number => {
   const solved = new Set(history.map((h) => h.taskId));
   return TASKS.length - solved.size;
-}
+};
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Дашборд' },
@@ -36,9 +36,9 @@ const FILTER_ITEMS = [
   { id: 'bug', label: 'Баг-репорты' },
 ];
 
-function userInitials(email: string): string {
+const userInitials = (email: string): string => {
   return email.charAt(0).toUpperCase();
-}
+};
 
 export const Sidebar = ({
   currentScreen,

@@ -12,11 +12,11 @@ interface FeedbackProps {
   onBack: () => void;
 }
 
-function scoreColor(n: number): string {
+const scoreColor = (n: number): string => {
   if (n >= 80) return 'var(--accent3)';
   if (n >= 55) return 'var(--accent2)';
   return 'var(--danger)';
-}
+};
 
 export const FeedbackPanel = ({ data, earnedXP, selfScore, prevBestScore, onBack }: FeedbackProps) => {
   const awareness = selfScore && data.score

@@ -39,40 +39,40 @@ export const PROVIDERS: Record<string, AIProvider> = {
   },
 };
 
-export function getProvider(): string {
+export const getProvider = (): string => {
   if (typeof window === 'undefined') {
     return 'claude';
   }
 
   return localStorage.getItem('tc_provider') || 'claude';
-}
+};
 
-export function setProvider(id: string): void {
+export const setProvider = (id: string): void => {
   localStorage.setItem('tc_provider', id);
-}
+};
 
-export function getApiKey(provider?: string): string {
+export const getApiKey = (provider?: string): string => {
   if (typeof window === 'undefined') {
     return '';
   }
   const prov = provider || getProvider();
 
   return localStorage.getItem(`tc_apikey_${prov}`) || '';
-}
+};
 
-export function setApiKey(provider: string, key: string): void {
+export const setApiKey = (provider: string, key: string): void => {
   if (key) {
     localStorage.setItem(`tc_apikey_${provider}`, key);
   } else {
     localStorage.removeItem(`tc_apikey_${provider}`);
   }
-}
+};
 
-export function removeApiKey(provider: string): void {
+export const removeApiKey = (provider: string): void => {
   localStorage.removeItem(`tc_apikey_${provider}`);
-}
+};
 
-export function buildPrompt(task: Task, answer: string): string {
+export const buildPrompt = (task: Task, answer: string): string => {
   const rubric = RUBRICS_MAP[task.type];
   const sectionsLabels: Record<string, string> = {
     functional: 'Позитивные сценарии, Негативные сценарии, Граничные значения, Структура',
@@ -112,9 +112,9 @@ ${answer}
     {"title": "${sectionsLabels[task.type]?.split(', ')[3] || 'Раздел 4'}", "score": число 0-100, "comment": "замечания по разделу"}
   ]
 }`;
-}
+};
 
-export async function callClaude(prompt: string): Promise<FeedbackResult> {
+export const callClaude = async (prompt: string): Promise<FeedbackResult> => {
   const provId = getProvider();
   const prov = PROVIDERS[provId];
   const key = getApiKey();
@@ -173,12 +173,12 @@ export async function callClaude(prompt: string): Promise<FeedbackResult> {
   }
 
   return JSON.parse(clean);
-}
+};
 
-export async function testApiConnection(
+export const testApiConnection = async (
   provider: string,
   key: string,
-): Promise<{ ok: boolean; message: string }> {
+): Promise<{ ok: boolean; message: string }> => {
   const prov = PROVIDERS[provider];
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   let body: string;
@@ -223,9 +223,9 @@ export async function testApiConnection(
       message: `✗ ${error instanceof Error ? error.message : 'Network error'}`,
     };
   }
-}
+};
 
-export async function askTheoryQuestion(q: string): Promise<string> {
+export const askTheoryQuestion = async (q: string): Promise<string> => {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -246,9 +246,9 @@ export async function askTheoryQuestion(q: string): Promise<string> {
     .map((c: { text?: string }) => c.text || '')
     .join('')
     .trim();
-}
+};
 
-export async function getHint(task: Task, answer: string): Promise<string> {
+export const getHint = async (task: Task, answer: string): Promise<string> => {
   const provId = getProvider();
   const prov = PROVIDERS[provId];
   const key = getApiKey();
@@ -300,9 +300,9 @@ export async function getHint(task: Task, answer: string): Promise<string> {
     ? data.content.map((c: { text?: string }) => c.text || '').join('')
     : data.choices?.[0]?.message?.content || ''
   ).trim();
-}
+};
 
-export async function getIdealAnswer(task: Task): Promise<string> {
+export const getIdealAnswer = async (task: Task): Promise<string> => {
   const provId = getProvider();
   const prov = PROVIDERS[provId];
   const key = getApiKey();
@@ -373,9 +373,9 @@ export async function getIdealAnswer(task: Task): Promise<string> {
       : data.choices?.[0]?.message?.content || '';
 
   return text.trim();
-}
+};
 
-export function scoreColor(n: number): string {
+export const scoreColor = (n: number): string => {
   if (n >= 80) {
     return 'score-green';
   }
@@ -384,4 +384,4 @@ export function scoreColor(n: number): string {
   }
 
   return 'score-red';
-}
+};

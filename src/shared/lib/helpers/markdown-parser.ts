@@ -1,11 +1,11 @@
 const BOLD_RE = /\*\*(.+?)\*\*/g;
 const CODE_RE = /`(.+?)`/g;
 
-export function escapeHtml(text: string): string {
+export const escapeHtml = (text: string): string => {
   return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-}
+};
 
-export function renderInline(text: string): string {
+export const renderInline = (text: string): string => {
   let result = escapeHtml(text);
   // Bold: **text**
   result = result.replaceAll(BOLD_RE, '<strong>$1</strong>');
@@ -13,9 +13,9 @@ export function renderInline(text: string): string {
   result = result.replaceAll(CODE_RE, '<code>$1</code>');
 
   return result;
-}
+};
 
-export function parseMarkdown(markdown: string): string {
+export const parseMarkdown = (markdown: string): string => {
   const lines = markdown.split('\n');
   let html = '';
   let inCode = false;
@@ -74,4 +74,4 @@ export function parseMarkdown(markdown: string): string {
   }
 
   return html;
-}
+};

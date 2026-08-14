@@ -29,6 +29,7 @@ if (isBrowser) {
     private static readonly styles = (() => {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(STYLES);
+
       return sheet;
     })();
 

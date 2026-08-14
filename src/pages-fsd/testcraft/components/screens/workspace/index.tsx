@@ -377,7 +377,7 @@ export const WorkspaceScreen = ({
   );
 };
 
-function showToast(msg: string, color?: string) {
+const showToast = (msg: string, color?: string) => {
   const t = document.createElement('div');
   t.className = 'toast';
   t.textContent = msg;
@@ -386,4 +386,4 @@ function showToast(msg: string, color?: string) {
   }
   document.body.append(t);
   setTimeout(() => t.remove(), 3200);
-}
+};

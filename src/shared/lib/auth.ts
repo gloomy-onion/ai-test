@@ -13,19 +13,19 @@ export interface TokenPayload {
   exp: number;
 }
 
-export async function createToken(email: string): Promise<string> {
+export const createToken = async (email: string): Promise<string> => {
   return new SignJWT({ email })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(Math.floor(Date.now() / 1000) + TOKEN_MAX_AGE)
     .sign(JWT_SECRET);
-}
+};
 
-export async function verifyToken(token: string): Promise<TokenPayload | null> {
+export const verifyToken = async (token: string): Promise<TokenPayload | null> => {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
     return payload as unknown as TokenPayload;
   } catch {
     return null;
   }
-}
+};
