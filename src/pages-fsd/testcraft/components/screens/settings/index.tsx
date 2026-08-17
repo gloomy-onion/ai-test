@@ -10,7 +10,7 @@ import {
   removeApiKey,
   testApiConnection,
 } from '@/shared/lib/helpers/ai-provider';
-import { Button } from '@/shared/ui';
+import '@/shared/ui/atoms/button';
 import styles from './styles.module.scss';
 
 export const SettingsScreen = () => {
@@ -118,15 +118,15 @@ export const SettingsScreen = () => {
             placeholder={prov.keyHint}
           />
           <div className={styles.settingsActions}>
-            <Button variant="primary" size="sm" onClick={handleSave}>
+            <button-element variant="primary" size="sm" onClick={handleSave}>
               Сохранить ключ
-            </Button>
-            <Button size="sm" onClick={handleTest} disabled={testing}>
+            </button-element>
+            <button-element size="sm" onClick={handleTest} disabled={testing}>
               {testing ? 'Проверяю...' : 'Проверить соединение'}
-            </Button>
-            <Button size="sm" onClick={handleClear}>
+            </button-element>
+            <button-element size="sm" onClick={handleClear}>
               Удалить ключ
-            </Button>
+            </button-element>
           </div>
           {status && (
             <div

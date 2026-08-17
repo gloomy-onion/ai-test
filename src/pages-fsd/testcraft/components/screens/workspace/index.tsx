@@ -13,7 +13,7 @@ import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@
 import { TASKS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
 import { calculateRetryXP } from '@/shared/lib/helpers/xp-system';
 import type { HistoryEntry, FeedbackResult } from '@/shared/lib/helpers/types';
-import { Button } from '@/shared/ui';
+import '@/shared/ui/atoms/button';
 import '@/shared/ui/atoms/markdown';
 import { FeedbackPanel } from '../../feedback';
 import styles from './styles.module.scss';
@@ -302,16 +302,16 @@ export const WorkspaceScreen = ({
           )}
 
           <div className={styles.wsActions}>
-            <Button size="sm" onClick={() => setPreview((p) => !p)}>
+            <button-element size="sm" onClick={() => setPreview((p) => !p)}>
               {preview ? '✏️ Редактировать' : '👁️ Предпросмотр'}
-            </Button>
-            <Button size="sm" onClick={handleGetHint} disabled={hintLoading}>
+            </button-element>
+            <button-element size="sm" onClick={handleGetHint} disabled={hintLoading}>
               💡 {hintLoading ? 'Загрузка...' : 'Подсказка'}
-            </Button>
-            <Button size="sm" onClick={handleIdealAnswer} disabled={idealAnswerLoading}>
+            </button-element>
+            <button-element size="sm" onClick={handleIdealAnswer} disabled={idealAnswerLoading}>
               ★ {idealAnswerLoading ? 'Загрузка...' : 'Эталон'}
-            </Button>
-            <Button
+            </button-element>
+            <button-element
               variant="primary"
               size="sm"
               id="submitBtn"
@@ -319,7 +319,7 @@ export const WorkspaceScreen = ({
               disabled={loading}
             >
               {loading ? 'Анализирую...' : '✦ Проверить AI'}
-            </Button>
+            </button-element>
           </div>
 
           {hintText && (

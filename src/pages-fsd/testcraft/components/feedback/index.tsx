@@ -1,7 +1,7 @@
 'use client';
 
 import type { FeedbackResult } from '@/shared/lib/helpers/types';
-import { Button, ScoreCard } from '@/shared/ui';
+import { ScoreCard } from '@/shared/ui';
 import styles from './styles.module.scss';
 
 interface FeedbackProps {
@@ -120,9 +120,9 @@ export const FeedbackPanel = ({ data, earnedXP, selfScore, prevBestScore, onBack
         </div>
       ) : null}
 
-      <Button variant="primary" fullWidth onClick={onBack}>
+      <button-element variant="primary" full-width onClick={onBack}>
         ← Выбрать следующее задание
-      </Button>
+      </button-element>
     </div>
   );
 };

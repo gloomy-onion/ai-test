@@ -4,7 +4,8 @@ import { TASKS } from '@/shared/lib/helpers/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/helpers/xp-system';
 import { BADGES, CATEGORY_ICONS } from '@/shared/lib/helpers/badges-data';
-import { Button, HistoryRow, StatCard } from '@/shared/ui';
+import { HistoryRow, StatCard } from '@/shared/ui';
+import '@/shared/ui/atoms/button';
 import '@/shared/ui/atoms/badge-pill';
 import '@/shared/ui/atoms/progress-bar';
 import styles from './styles.module.scss';
@@ -130,18 +131,14 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
       )}
 
       <div className={styles.profileClearRow}>
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={() => {
-            // eslint-disable-next-line no-alert
-            if (window.confirm('Сбросить весь прогресс? Это действие нельзя отменить.')) {
-              onClearHistory();
-            }
-          }}
-        >
+        <button-element variant="danger" size="sm" onClick={() => {
+          // eslint-disable-next-line no-alert
+          if (window.confirm('Сбросить весь прогресс? Это действие нельзя отменить.')) {
+            onClearHistory();
+          }
+        }}>
           Сбросить прогресс
-        </Button>
+        </button-element>
       </div>
     </div>
   );

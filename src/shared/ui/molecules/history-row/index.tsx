@@ -1,7 +1,8 @@
 'use client';
 
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
-import { Button, ScoreCircle } from '@/shared/ui/atoms';
+import '@/shared/ui/atoms/button';
+import '@/shared/ui/atoms/score-circle';
 import styles from './styles.module.scss';
 
 interface HistoryRowProps {
@@ -33,9 +34,9 @@ export const HistoryRow = ({ entry, onRepeat }: HistoryRowProps) => {
         )}
       </div>
       {onRepeat && (
-        <Button size="sm" onClick={() => onRepeat(entry.taskId)}>
+        <button-element size="sm" onClick={() => onRepeat(entry.taskId)}>
           Повторить
-        </Button>
+        </button-element>
       )}
     </div>
   );

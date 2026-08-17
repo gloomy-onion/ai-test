@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { askTheoryQuestion } from '@/shared/lib/helpers/ai-provider';
 import { THEORY_TOPICS } from '@/shared/lib/helpers/tasks-data';
-import { Button, ChatBubble } from '@/shared/ui';
+import { ChatBubble } from '@/shared/ui';
+import '@/shared/ui/atoms/button';
 import styles from './styles.module.scss';
 
 interface ChatMessage {
@@ -100,9 +101,9 @@ export const TheoryScreen = () => {
             }}
             placeholder="Например: чем тест-кейс отличается от чек-листа?"
           />
-          <Button variant="primary" size="sm" onClick={() => handleAsk()} disabled={loading}>
+          <button-element variant="primary" size="sm" onClick={() => handleAsk()} disabled={loading}>
             Спросить
-          </Button>
+          </button-element>
         </div>
       </div>
     </div>

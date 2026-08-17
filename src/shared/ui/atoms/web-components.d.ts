@@ -28,12 +28,19 @@ declare module 'react' {
         key?: React.Key;
         class?: string;
         score?: number;
-      }
+      };
       'spinner-element': {
         key?: React.Key;
         class?: string;
         size?: 'sm' | 'md';
-      }
+      };
+      'button-element': {
+        [key: string]: any;
+        variant?: 'default' | 'primary' | 'danger';
+        size?: 'md' | 'sm';
+        disabled?: boolean;
+        fullWidth?: boolean;
+      };
     }
   }
 }
