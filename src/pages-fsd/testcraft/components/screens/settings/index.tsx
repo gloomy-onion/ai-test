@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   PROVIDERS,
   getProvider,
@@ -11,6 +11,7 @@ import {
   testApiConnection,
 } from '@/shared/lib/helpers/ai-provider';
 import '@/shared/ui/atoms/button';
+import '@/shared/ui/atoms/popover'
 import styles from './styles.module.scss';
 
 export const SettingsScreen = () => {
@@ -18,6 +19,7 @@ export const SettingsScreen = () => {
   const [keyInput, setKeyInput] = useState('');
   const [status, setStatus] = useState<{ type: string; text: string } | null>(null);
   const [testing, setTesting] = useState(false);
+  const popoverRef = useRef<any>(null);
 
   useEffect(() => {
     const prov = getProvider();
@@ -58,6 +60,11 @@ export const SettingsScreen = () => {
     setTesting(false);
   };
 
+  const handleToggle = () => {
+    const popover = document.getElementById('settings-popover') as any;
+    popover?.togglePanel();
+  };
+
   const prov = PROVIDERS[selected];
   const isClaude = selected === 'claude';
   const isFree = prov?.free && !isClaude;
@@ -68,6 +75,21 @@ export const SettingsScreen = () => {
       <div className={styles.settingsDesc}>
         Выберите AI-провайдера для проверки заданий. Ключ хранится только в вашем браузере.
       </div>
+
+      <popover-element id="settings-popover">
+        <button slot="trigger">
+          Открыть
+        </button>
+        <div slot="content">
+          <label>
+            Имя
+            <input type="text" placeholder="Иван Иванов" />
+          </label>
+          <button-element>
+            Сохранить
+          </button-element>
+        </div>
+      </popover-element>
 
       <div className={styles.settingsCard}>
         <div className={styles.settingsCardTitle}>Провайдер</div>

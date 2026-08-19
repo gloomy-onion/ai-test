@@ -95,7 +95,6 @@ if (isBrowser) {
       }
       this.#syncDisabled();
 
-      // Delegate click from inner button to host.onclick (React onClick)
       if (this.#button) {
         this.#button.addEventListener('click', () => {
           const handler = (this as any).onclick;

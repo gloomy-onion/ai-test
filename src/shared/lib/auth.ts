@@ -5,7 +5,7 @@ const JWT_SECRET = new TextEncoder().encode(
 );
 
 export const TOKEN_NAME = 'auth-token';
-export const TOKEN_MAX_AGE = 30 * 60;
+export const TOKEN_MAX_AGE = 1000 * 60;
 
 export interface TokenPayload {
   email: string;

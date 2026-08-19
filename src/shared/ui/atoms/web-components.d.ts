@@ -35,12 +35,24 @@ declare module 'react' {
         size?: 'sm' | 'md';
       };
       'button-element': {
-        [key: string]: any;
+        key?: React.Key;
         variant?: 'default' | 'primary' | 'danger';
         size?: 'md' | 'sm';
         disabled?: boolean;
         fullWidth?: boolean;
+        children?: React.ReactNode;
+        onClick?: () => void;
+        slot?: string;
       };
+      'popover-element': {
+        key?: React.Key;
+        id?: string;
+        class?: string;
+        position?: 'top-start' | 'bottom-start' | 'bottom-end' | 'top-end';
+        open?: boolean;
+        children?: React.ReactNode;
+        hide?: boolean;
+      }
     }
   }
 }
