@@ -25,6 +25,8 @@ if (isBrowser) {
 
     private panel: HTMLElement | null = null;
 
+    private shadowTrigger: HTMLButtonElement | null = null;
+
     public connectedCallback(): void {
       if (!this.shadowRoot) {
         const shadow = this.attachShadow({ mode: 'open' });
@@ -32,6 +34,13 @@ if (isBrowser) {
       }
 
       this.render();
+      this.syncTrigger();
+
+      const triggerSlot = this.querySelector('[slot="trigger"]');
+      if (triggerSlot) {
+        const observer = new MutationObserver(() => this.syncTrigger());
+        observer.observe(triggerSlot, { childList: true, subtree: true });
+      }
     }
 
     public open(): void {
@@ -42,9 +51,7 @@ if (isBrowser) {
       this.panel?.hidePopover();
     }
 
-    public togglePanel(): void {
-      console.log('BEFORE:', this.panel?.matches(':popover-open'));
-
+    public toggle(): void {
       if (this.panel?.matches(':popover-open')) {
         this.hide();
       } else {
@@ -59,19 +66,38 @@ if (isBrowser) {
       }
 
       shadow.innerHTML = `
-    <slot name="trigger"></slot>
-    <div class="panel" id="panel" popover="manual" role="dialog">
+    <button id="shadow-trigger" popovertarget="panel">
+      <slot name="trigger-content"></slot>
+    </button>
+    <slot name="trigger" style="display:none"></slot>
+    <div class="panel" id="panel" popover role="dialog">
       <slot name="content"></slot>
     </div>
     <div class="arrow"></div>
   `;
 
       this.panel = shadow.getElementById('panel');
+      this.shadowTrigger = shadow.getElementById('shadow-trigger') as HTMLButtonElement | null;
+    }
 
-      const trigger = this.querySelector<HTMLButtonElement>('[slot="trigger"]');
+    private syncTrigger(): void {
+      const slotted = this.querySelector<HTMLButtonElement>('[slot="trigger"]');
+      if (slotted && this.shadowTrigger) {
+        let slot = this.shadowTrigger.querySelector<HTMLSlotElement>(
+          'slot[name="trigger-content"]',
+        );
+        if (!slot) {
+          slot = document.createElement('slot');
+          slot.name = 'trigger-content';
+          this.shadowTrigger.append(slot);
+        }
 
-      if (trigger && this.panel) {
-        trigger.popoverTargetElement = this.panel;
+        while (slot.firstChild) {
+          slot.firstChild.remove();
+        }
+        [...slotted.childNodes].forEach((child) => {
+          slot.append(child.cloneNode(true));
+        });
       }
     }
   }

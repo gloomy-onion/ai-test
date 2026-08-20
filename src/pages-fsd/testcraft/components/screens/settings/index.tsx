@@ -19,7 +19,7 @@ export const SettingsScreen = () => {
   const [keyInput, setKeyInput] = useState('');
   const [status, setStatus] = useState<{ type: string; text: string } | null>(null);
   const [testing, setTesting] = useState(false);
-  const popoverRef = useRef<any>(null);
+  const popoverRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const prov = getProvider();
@@ -60,11 +60,6 @@ export const SettingsScreen = () => {
     setTesting(false);
   };
 
-  const handleToggle = () => {
-    const popover = document.getElementById('settings-popover') as any;
-    popover?.togglePanel();
-  };
-
   const prov = PROVIDERS[selected];
   const isClaude = selected === 'claude';
   const isFree = prov?.free && !isClaude;
@@ -77,9 +72,9 @@ export const SettingsScreen = () => {
       </div>
 
       <popover-element id="settings-popover">
-        <button slot="trigger">
+        <button-element slot="trigger">
           Открыть
-        </button>
+        </button-element>
         <div slot="content">
           <label>
             Имя
