@@ -72,8 +72,8 @@ export const SettingsScreen = () => {
       </div>
 
       <popover-element id="settings-popover" position={'bottom-start'}>
-        <button-element slot="trigger">
-          Провайдер
+        <button-element slot="trigger" variant="primary" size="sm">
+          ⚙ Настройки
         </button-element>
         <div slot="content">
           <div className={styles.settingsCard}>
