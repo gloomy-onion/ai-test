@@ -1,12 +1,17 @@
 const STYLES = `
 :host {
-  width: 440px;
-  height: 440px;
-  border-radius: 12px;
+  display: inline-block;
+  width: auto;
+  height: auto;
 }
 
 :host(:has(.panel:popover-open)) ::slotted([slot="trigger"]) {
   pointer-events: none;
+}
+
+:host::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.15s ease;
 }
 
 .panel {
@@ -15,6 +20,58 @@ const STYLES = `
   inset: unset;
   top: 0;
   left: 0;
+  
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 22px;
+  
+  font-family: var(--font-body);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  animation: popoverEnter 0.2s ease;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.panel::-webkit-scrollbar-thumb:hover {
+  background: #555a70;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popoverEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 `;
 

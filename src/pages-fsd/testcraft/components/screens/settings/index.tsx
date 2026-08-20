@@ -71,48 +71,40 @@ export const SettingsScreen = () => {
         Выберите AI-провайдера для проверки заданий. Ключ хранится только в вашем браузере.
       </div>
 
-      <popover-element id="settings-popover" position={'top-end'}>
+      <popover-element id="settings-popover" position={'bottom-start'}>
         <button-element slot="trigger">
-          Открыть
+          Провайдер
         </button-element>
         <div slot="content">
-          <label>
-            Имя
-            <input type="text" placeholder="Иван Иванов" />
-          </label>
-          <button-element>
-            Сохранить
-          </button-element>
+          <div className={styles.settingsCard}>
+            <div className={styles.settingsCardTitle}>Провайдер</div>
+            <div className={styles.settingsCardDesc}>
+              Claude работает автоматически внутри claude.ai без ключа. Для остальных или для локального
+              запуска нужен API-ключ.
+            </div>
+            <div className={styles.providerGrid}>
+              {Object.entries(PROVIDERS).map(([id, p]) => (
+                <div
+                  key={id}
+                  className={`${styles.providerCard} ${selected === id ? styles.providerCardSelected : ''}`}
+                  onClick={() => handleSelect(id)}
+                >
+                  <div className={styles.providerName}>{p.name}</div>
+                  <div className={styles.providerNote}>
+                    {p.free ? (
+                      <span className={styles.freeText}>Бесплатно</span>
+                    ) : p.name === 'Claude' ? (
+                      'Anthropic'
+                    ) : (
+                      'OpenAI'
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </popover-element>
-
-      <div className={styles.settingsCard}>
-        <div className={styles.settingsCardTitle}>Провайдер</div>
-        <div className={styles.settingsCardDesc}>
-          Claude работает автоматически внутри claude.ai без ключа. Для остальных или для локального
-          запуска нужен API-ключ.
-        </div>
-        <div className={styles.providerGrid}>
-          {Object.entries(PROVIDERS).map(([id, p]) => (
-            <div
-              key={id}
-              className={`${styles.providerCard} ${selected === id ? styles.providerCardSelected : ''}`}
-              onClick={() => handleSelect(id)}
-            >
-              <div className={styles.providerName}>{p.name}</div>
-              <div className={styles.providerNote}>
-                {p.free ? (
-                  <span className={styles.freeText}>Бесплатно</span>
-                ) : p.name === 'Claude' ? (
-                  'Anthropic'
-                ) : (
-                  'OpenAI'
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {prov && (
         <div className={styles.settingsCard}>
