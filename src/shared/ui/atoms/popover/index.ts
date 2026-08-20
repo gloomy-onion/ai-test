@@ -8,6 +8,14 @@ const STYLES = `
 :host(:has(.panel:popover-open)) ::slotted([slot="trigger"]) {
   pointer-events: none;
 }
+
+.panel {
+  position: fixed;
+  margin: 0;
+  inset: unset;
+  top: 0;
+  left: 0;
+}
 `;
 
 const isBrowser = typeof window !== 'undefined' && typeof HTMLElement !== 'undefined';
@@ -59,11 +67,17 @@ if (isBrowser) {
       }
     }
 
+    private readonly handleReposition = (): void => {
+      this.hide();
+    };
+
     private render(): void {
       const shadow = this.shadowRoot;
       if (!shadow) {
         return;
       }
+
+      this.panel?.removeEventListener('toggle', this.handleToggle);
 
       shadow.innerHTML = `
     <button id="shadow-trigger" popovertarget="panel">
@@ -78,6 +92,57 @@ if (isBrowser) {
 
       this.panel = shadow.getElementById('panel');
       this.shadowTrigger = shadow.getElementById('shadow-trigger') as HTMLButtonElement | null;
+
+      this.panel?.addEventListener('toggle', this.handleToggle);
+    }
+
+    public disconnectedCallback(): void {
+      window.removeEventListener('scroll', this.handleReposition, true);
+      window.removeEventListener('resize', this.handleReposition);
+    }
+
+    private readonly handleToggle = (event: Event): void => {
+      const toggleEvent = event as ToggleEvent;
+      if (toggleEvent.newState === 'open') {
+        this.updatePosition();
+        window.addEventListener('scroll', this.handleReposition, true);
+        window.addEventListener('resize', this.handleReposition);
+      } else {
+        window.removeEventListener('scroll', this.handleReposition, true);
+        window.removeEventListener('resize', this.handleReposition);
+      }
+    };
+
+    private updatePosition(): void {
+      if (!this.panel || !this.shadowTrigger) {
+        return;
+      }
+
+      const gap = 8;
+      const triggerRect = this.shadowTrigger.getBoundingClientRect();
+      const panelRect = this.panel.getBoundingClientRect();
+      const position = this.getAttribute('position') ?? 'bottom-start';
+      const [vertical, horizontal] = position.split('-') as ['top' | 'bottom', 'start' | 'end'];
+
+      let finalVertical = vertical;
+      if (vertical === 'top' && triggerRect.top - panelRect.height - gap < 0) {
+        finalVertical = 'bottom';
+      } else if (
+        vertical === 'bottom' &&
+        triggerRect.bottom + gap + panelRect.height > window.innerHeight
+      ) {
+        finalVertical = 'top';
+      }
+
+      const top =
+        finalVertical === 'top'
+          ? triggerRect.top - panelRect.height - gap
+          : triggerRect.bottom + gap;
+
+      const left = horizontal === 'end' ? triggerRect.right - panelRect.width : triggerRect.left;
+
+      this.panel.style.top = `${top}px`;
+      this.panel.style.left = `${left}px`;
     }
 
     private syncTrigger(): void {

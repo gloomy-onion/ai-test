@@ -71,7 +71,7 @@ export const SettingsScreen = () => {
         Выберите AI-провайдера для проверки заданий. Ключ хранится только в вашем браузере.
       </div>
 
-      <popover-element id="settings-popover">
+      <popover-element id="settings-popover" position={'top-end'}>
         <button-element slot="trigger">
           Открыть
         </button-element>
