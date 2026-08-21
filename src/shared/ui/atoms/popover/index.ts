@@ -1,17 +1,14 @@
+'use client';
+
 const STYLES = `
 :host {
-  display: inline-block;
-  width: auto;
-  height: auto;
+  width: 440px;
+  height: 440px;
+  border-radius: 12px;
 }
 
 :host(:has(.panel:popover-open)) ::slotted([slot="trigger"]) {
   pointer-events: none;
-}
-
-:host::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-  animation: fadeIn 0.15s ease;
 }
 
 .panel {
@@ -20,58 +17,9 @@ const STYLES = `
   inset: unset;
   top: 0;
   left: 0;
-  
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
-  padding: 22px;
-  
-  font-family: var(--font-body);
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  
-  animation: popoverEnter 0.2s ease;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
-  z-index: 1000;
-}
-
-.panel::-webkit-scrollbar {
-  width: 6px;
-}
-
-.panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.panel::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
-}
-
-.panel::-webkit-scrollbar-thumb:hover {
-  background: #555a70;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes popoverEnter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  border: none;
+  padding: 0;
+  background: none;
 }
 `;
 
@@ -90,7 +38,7 @@ if (isBrowser) {
 
     private panel: HTMLElement | null = null;
 
-    private shadowTrigger: HTMLButtonElement | null = null;
+    private isPopoverOpen = false;
 
     public connectedCallback(): void {
       if (!this.shadowRoot) {
@@ -98,26 +46,41 @@ if (isBrowser) {
         shadow.adoptedStyleSheets = [PopoverElement.styles];
       }
 
-      this.render();
-      this.syncTrigger();
+      this.addEventListener('click', this.handleClick);
 
-      const triggerSlot = this.querySelector('[slot="trigger"]');
-      if (triggerSlot) {
-        const observer = new MutationObserver(() => this.syncTrigger());
-        observer.observe(triggerSlot, { childList: true, subtree: true });
-      }
+      this.render();
+    }
+
+    public disconnectedCallback(): void {
+      this.removeEventListener('click', this.handleClick);
+
+      document.removeEventListener('pointerdown', this.handleOutsideClick, true);
+      document.removeEventListener('keydown', this.handleEscape);
+      window.removeEventListener('scroll', this.handleReposition, true);
+      window.removeEventListener('resize', this.handleReposition);
     }
 
     public open(): void {
+      if (this.isPopoverOpen) {
+        return;
+      }
       this.panel?.showPopover();
+      this.isPopoverOpen = true;
+      this.updatePosition();
+      this.attachLifecycleListeners();
     }
 
     public hide(): void {
+      if (!this.isPopoverOpen) {
+        return;
+      }
       this.panel?.hidePopover();
+      this.isPopoverOpen = false;
+      this.detachLifecycleListeners();
     }
 
     public toggle(): void {
-      if (this.panel?.matches(':popover-open')) {
+      if (this.isPopoverOpen) {
         this.hide();
       } else {
         this.open();
@@ -128,55 +91,78 @@ if (isBrowser) {
       this.hide();
     };
 
+    private readonly handleClick = (event: Event): void => {
+      const path = event.composedPath();
+      for (const node of path) {
+        if (node instanceof HTMLElement && node.getAttribute('slot') === 'trigger') {
+          this.toggle();
+
+          return;
+        }
+      }
+    };
+
+    private readonly handleOutsideClick = (event: Event): void => {
+      if (!this.isPopoverOpen) {
+        return;
+      }
+      const path = event.composedPath();
+      for (const node of path) {
+        if (node === this) {
+          return;
+        }
+      }
+      this.hide();
+    };
+
+    private readonly handleEscape = (event: KeyboardEvent): void => {
+      if (!this.isPopoverOpen) {
+        return;
+      }
+      if (event.key === 'Escape') {
+        this.hide();
+      }
+    };
+
+    private attachLifecycleListeners(): void {
+      document.addEventListener('pointerdown', this.handleOutsideClick, true);
+      document.addEventListener('keydown', this.handleEscape);
+      window.addEventListener('scroll', this.handleReposition, true);
+      window.addEventListener('resize', this.handleReposition);
+    }
+
+    private detachLifecycleListeners(): void {
+      document.removeEventListener('pointerdown', this.handleOutsideClick, true);
+      document.removeEventListener('keydown', this.handleEscape);
+      window.removeEventListener('scroll', this.handleReposition, true);
+      window.removeEventListener('resize', this.handleReposition);
+    }
+
     private render(): void {
       const shadow = this.shadowRoot;
       if (!shadow) {
         return;
       }
 
-      this.panel?.removeEventListener('toggle', this.handleToggle);
-
       shadow.innerHTML = `
-    <button id="shadow-trigger" popovertarget="panel">
-      <slot name="trigger-content"></slot>
-    </button>
-    <slot name="trigger" style="display:none"></slot>
-    <div class="panel" id="panel" popover role="dialog">
-      <slot name="content"></slot>
-    </div>
-    <div class="arrow"></div>
-  `;
+        <slot name="trigger"></slot>
+        <div class="panel" id="panel" popover="manual" role="dialog">
+          <slot name="content"></slot>
+        </div>
+        <div class="arrow"></div>
+      `;
 
       this.panel = shadow.getElementById('panel');
-      this.shadowTrigger = shadow.getElementById('shadow-trigger') as HTMLButtonElement | null;
-
-      this.panel?.addEventListener('toggle', this.handleToggle);
     }
-
-    public disconnectedCallback(): void {
-      window.removeEventListener('scroll', this.handleReposition, true);
-      window.removeEventListener('resize', this.handleReposition);
-    }
-
-    private readonly handleToggle = (event: Event): void => {
-      const toggleEvent = event as ToggleEvent;
-      if (toggleEvent.newState === 'open') {
-        this.updatePosition();
-        window.addEventListener('scroll', this.handleReposition, true);
-        window.addEventListener('resize', this.handleReposition);
-      } else {
-        window.removeEventListener('scroll', this.handleReposition, true);
-        window.removeEventListener('resize', this.handleReposition);
-      }
-    };
 
     private updatePosition(): void {
-      if (!this.panel || !this.shadowTrigger) {
+      const trigger = this.querySelector<HTMLElement>('[slot="trigger"]');
+      if (!this.panel || !trigger) {
         return;
       }
 
       const gap = 8;
-      const triggerRect = this.shadowTrigger.getBoundingClientRect();
+      const triggerRect = trigger.getBoundingClientRect();
       const panelRect = this.panel.getBoundingClientRect();
       const position = this.getAttribute('position') ?? 'bottom-start';
       const [vertical, horizontal] = position.split('-') as ['top' | 'bottom', 'start' | 'end'];
@@ -200,27 +186,6 @@ if (isBrowser) {
 
       this.panel.style.top = `${top}px`;
       this.panel.style.left = `${left}px`;
-    }
-
-    private syncTrigger(): void {
-      const slotted = this.querySelector<HTMLButtonElement>('[slot="trigger"]');
-      if (slotted && this.shadowTrigger) {
-        let slot = this.shadowTrigger.querySelector<HTMLSlotElement>(
-          'slot[name="trigger-content"]',
-        );
-        if (!slot) {
-          slot = document.createElement('slot');
-          slot.name = 'trigger-content';
-          this.shadowTrigger.append(slot);
-        }
-
-        while (slot.firstChild) {
-          slot.firstChild.remove();
-        }
-        [...slotted.childNodes].forEach((child) => {
-          slot.append(child.cloneNode(true));
-        });
-      }
     }
   }
 
