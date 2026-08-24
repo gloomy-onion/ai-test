@@ -53,6 +53,12 @@ declare module 'react' {
         children?: React.ReactNode;
         hide?: boolean;
       }
+      'pagination-element': {
+        key?: React.Key;
+        page?: number;
+        totalPages?: number;
+        onChange?: (event: CustomEvent<{ page: number; totalPages: number }>) => void;
+      }
     }
   }
 }
