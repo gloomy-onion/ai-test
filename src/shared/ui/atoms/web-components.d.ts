@@ -43,6 +43,7 @@ declare module 'react' {
         children?: React.ReactNode;
         onClick?: () => void;
         slot?: string;
+        id?: string;
       };
       'popover-element': {
         key?: React.Key;
