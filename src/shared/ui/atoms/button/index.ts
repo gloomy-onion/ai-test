@@ -57,10 +57,11 @@ const STYLES = `
 
 button {
   all: unset;
-  display: block;
+  display: flex;
   width: 100%;
   height: 100%;
   cursor: pointer;
+  align-items: center;
 }
 
 button:focus-visible {

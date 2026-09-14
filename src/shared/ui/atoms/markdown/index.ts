@@ -70,6 +70,29 @@ li {
   line-height: 1.5;
 }
 
+table {
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 13px;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+}
+
+th {
+  background: var(--surface2);
+  font-weight: 600;
+}
+
+tbody tr:nth-child(even) td {
+  background: var(--surface);
+}
+
 strong {
   font-weight: 600;
 }

@@ -173,6 +173,21 @@ export const WorkspaceScreen = ({
     setIdealAnswerLoading(false);
   }, [task, idealAnswer]);
 
+  const writeClipboard = async (text: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(text.trim());
+    } catch {
+      throw new Error('Clipboard error');
+    }
+  };
+
+  const handleCopy = () => {
+    writeClipboard(idealAnswer).then(
+      () => showToast('Скопировано ✓', 'var(--success)'),
+      () => showToast('Не удалось скопировать. Скопируйте вручную.', 'var(--danger)'),
+    );
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !loading) {
@@ -222,12 +237,13 @@ export const WorkspaceScreen = ({
           )}
           <div className={styles.requirementBlock}>
             <div className={styles.reqLabel}>Требования</div>
-            <markdown-renderer class={styles.requirementText} text={task.requirement}></markdown-renderer>
+            <markdown-renderer
+              class={styles.requirementText}
+              text={task.requirement}
+            ></markdown-renderer>
           </div>
           <div className={styles.hintsWrap}>
-            <div className={`${styles.reqLabel} ${styles.hintsLabel}`}>
-              Быстрые шаблоны
-            </div>
+            <div className={`${styles.reqLabel} ${styles.hintsLabel}`}>Быстрые шаблоны</div>
             <div className={styles.templateHints}>
               {HINTS_MAP[task.type]?.map((h) => (
                 <span
@@ -266,7 +282,10 @@ export const WorkspaceScreen = ({
         <div className={styles.wsPanelBodyColumn}>
           {preview ? (
             <div className={styles.previewArea}>
-              <markdown-renderer class={styles.previewMarkdown} text={answer || '*Начните писать ответ...*'}></markdown-renderer>
+              <markdown-renderer
+                class={styles.previewMarkdown}
+                text={answer || '*Начните писать ответ...*'}
+              ></markdown-renderer>
             </div>
           ) : (
             <textarea
@@ -281,7 +300,9 @@ export const WorkspaceScreen = ({
 
           {!hasResult && !showSelfAssess && (
             <div className={styles.selfAssessPrompt}>
-              <span className={styles.selfAssessLabel}>Оцените свою уверенность (опционально):</span>
+              <span className={styles.selfAssessLabel}>
+                Оцените свою уверенность (опционально):
+              </span>
               <div className={styles.selfAssessStars}>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <span
@@ -326,9 +347,9 @@ export const WorkspaceScreen = ({
             <div className={styles.hintPanel}>
               <div className={styles.hintPanelHeader}>
                 <span>💡 Подсказка AI</span>
-                <span className={styles.closeHint} onClick={() => setHintText('')}>
+                <button-element variant="primary" size="sm" onClick={() => setHintText('')}>
                   ✕
-                </span>
+                </button-element>
               </div>
               <div className={styles.hintPanelBody}>{hintText}</div>
             </div>
@@ -338,11 +359,38 @@ export const WorkspaceScreen = ({
             <div className={styles.idealAnswerPanel}>
               <div className={styles.idealAnswerHeader}>
                 <span>★ Эталонный ответ</span>
-                <span className={styles.closeHint} onClick={() => setShowIdealAnswer(false)}>
-                  ✕
-                </span>
+                <div className={styles.buttons}>
+                  <button-element variant="primary" size="sm" onClick={() => handleCopy()}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <rect
+                        x="9"
+                        y="9"
+                        width="10"
+                        height="10"
+                        rx="2"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      />
+                      <path
+                        d="M15 9V6C15 4.89543 14.1046 4 13 4H6C4.89543 4 4 4.89543 4 6V13C4 14.1046 4.89543 15 6 15H9"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      />
+                    </svg>
+                  </button-element>
+                  <button-element
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setShowIdealAnswer(false)}
+                  >
+                    ✕
+                  </button-element>
+                </div>
               </div>
-              <div className={styles.idealAnswerBody}>{idealAnswer}</div>
+              <markdown-renderer
+                class={styles.idealAnswerBody}
+                text={idealAnswer}
+              ></markdown-renderer>
             </div>
           )}
 
@@ -355,7 +403,9 @@ export const WorkspaceScreen = ({
             )}
             {error && (
               <div className={`${styles.feedbackSection} ${styles.feedbackSectionError}`}>
-                <div className={`${styles.feedbackSectionTitle} ${styles.feedbackSectionTitleError}`}>
+                <div
+                  className={`${styles.feedbackSectionTitle} ${styles.feedbackSectionTitleError}`}
+                >
                   Ошибка
                 </div>
                 <div className={styles.feedbackText}>{error}</div>
