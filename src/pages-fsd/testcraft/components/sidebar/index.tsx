@@ -1,9 +1,12 @@
 'use client';
 
+import { NAV_ITEMS, FILTER_ITEMS } from '@/shared/lib/config';
 import { TASKS } from '@/shared/lib/helpers/tasks-data';
-import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { getRemainingTasks } from '@/shared/lib/helpers/tasks-data';
+import { getUserInitials } from '@/shared/lib/helpers/user';
 import { getTotalXP, getLevelInfo } from '@/shared/lib/helpers/xp-system';
 import styles from './styles.module.scss';
+import { HistoryEntry } from '@/shared/lib';
 
 interface SidebarProps {
   currentScreen: string;
@@ -14,31 +17,6 @@ interface SidebarProps {
   onLogout: () => void;
   activeFilter?: string;
 }
-
-const getRemainingTasks = (history: HistoryEntry[]): number => {
-  const solved = new Set(history.map((h) => h.taskId));
-  return TASKS.length - solved.size;
-};
-
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Дашборд' },
-  { id: 'tasks', label: 'Задания' },
-  { id: 'history', label: 'История' },
-  { id: 'theory', label: 'Теория' },
-  { id: 'profile', label: 'Профиль' },
-  { id: 'settings', label: 'Настройки API' },
-];
-
-const FILTER_ITEMS = [
-  { id: 'functional', label: 'Функциональное' },
-  { id: 'api', label: 'API' },
-  { id: 'ui', label: 'UI/UX' },
-  { id: 'bug', label: 'Баг-репорты' },
-];
-
-const userInitials = (email: string): string => {
-  return email.charAt(0).toUpperCase();
-};
 
 export const Sidebar = ({
   currentScreen,
@@ -51,7 +29,6 @@ export const Sidebar = ({
 }: SidebarProps) => {
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
-
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
@@ -97,8 +74,12 @@ export const Sidebar = ({
         </div>
       </nav>
 
+      <div>
+        соединение
+      </div>
+
       <div className={styles.sidebarUser}>
-        <div className={styles.userAvatar}>{userInitials(authUser)}</div>
+        <div className={styles.userAvatar}>{getUserInitials(authUser)}</div>
         <div className={styles.userInfo}>
           <div className={styles.userName}>{authUser}</div>
           <div className={styles.userLevel}>

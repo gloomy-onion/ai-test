@@ -1,4 +1,9 @@
-import type { Task, TheoryTopic, TaskCategory } from './types';
+import type { Task, TheoryTopic, TaskCategory, HistoryEntry } from './types';
+
+export const getRemainingTasks = (history: HistoryEntry[]): number => {
+  const solved = new Set(history.map((h) => h.taskId));
+  return TASKS.length - solved.size;
+};
 
 export const RUBRICS_MAP: Record<TaskCategory, string> = {
   functional: `Критерии оценки для чек-листов и тест-кейсов (функциональное тестирование):
