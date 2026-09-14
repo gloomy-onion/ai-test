@@ -11,6 +11,7 @@ export {
 export { LEVELS, getTotalXP, getLevelInfo } from '@/shared/lib/helpers/xp-system';
 export { getRemainingTasks } from '@/shared/lib/helpers/tasks-data';
 export { getUserInitials } from '@/shared/lib/helpers/user';
+export { writeClipboard, readClipboard } from '@/shared/lib/helpers/clipboard';
 export { loadHistory, saveHistory, loadDraft, saveDraft } from '@/shared/lib/helpers/storage';
 export type {
   Task,

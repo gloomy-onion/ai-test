@@ -12,6 +12,7 @@ import {
 import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@/shared/lib/helpers/storage';
 import { TASKS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
 import { calculateRetryXP } from '@/shared/lib/helpers/xp-system';
+import { writeClipboard, readClipboard } from '@/shared/lib/helpers/clipboard';
 import type { HistoryEntry, FeedbackResult } from '@/shared/lib/helpers/types';
 import '@/shared/ui/atoms/button';
 import '@/shared/ui/atoms/markdown';
@@ -173,18 +174,20 @@ export const WorkspaceScreen = ({
     setIdealAnswerLoading(false);
   }, [task, idealAnswer]);
 
-  const writeClipboard = async (text: string): Promise<void> => {
-    try {
-      await navigator.clipboard.writeText(text.trim());
-    } catch {
-      throw new Error('Clipboard error');
-    }
-  };
-
   const handleCopy = () => {
     writeClipboard(idealAnswer).then(
       () => showToast('Скопировано ✓', 'var(--success)'),
       () => showToast('Не удалось скопировать. Скопируйте вручную.', 'var(--danger)'),
+    );
+  };
+
+  const handlePaste = () => {
+    readClipboard().then(
+      (text) => {
+        setAnswer(text);
+        showToast('Вставлено из буфера обмена ✓', 'var(--success)');
+      },
+      () => showToast('Буфер обмена пуст. Вставьте вручную.', 'var(--danger)'),
     );
   };
 
@@ -278,6 +281,7 @@ export const WorkspaceScreen = ({
           <span className={styles.charCount}>
             {chars} симв. · {lines} стр. · попытка #{isRetry ? attempt : 1}
           </span>
+          <button-element onClick={() => handlePaste()}>Вставить из буфера</button-element>
         </div>
         <div className={styles.wsPanelBodyColumn}>
           {preview ? (
