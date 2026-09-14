@@ -31,9 +31,10 @@ export const Sidebar = ({
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
 
-  const [isOnline, setIsOnline] = useState(() => getNetworkInfo().online);
+  const [isOnline, setIsOnline] = useState(false);
 
   useEffect(() => {
+    setIsOnline(getNetworkInfo().online);
     return subscribeToNetwork(() => setIsOnline(getNetworkInfo().online));
   }, []);
 
