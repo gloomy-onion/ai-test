@@ -1,12 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { NAV_ITEMS, FILTER_ITEMS } from '@/shared/lib/config';
-import { TASKS } from '@/shared/lib/helpers/tasks-data';
 import { getRemainingTasks } from '@/shared/lib/helpers/tasks-data';
 import { getUserInitials } from '@/shared/lib/helpers/user';
+import { getNetworkInfo, subscribeToNetwork } from '@/shared/lib/helpers/network';
 import { getTotalXP, getLevelInfo } from '@/shared/lib/helpers/xp-system';
+import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import styles from './styles.module.scss';
-import { HistoryEntry } from '@/shared/lib';
 
 interface SidebarProps {
   currentScreen: string;
@@ -29,6 +30,13 @@ export const Sidebar = ({
 }: SidebarProps) => {
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
+
+  const [isOnline, setIsOnline] = useState(() => getNetworkInfo().online);
+
+  useEffect(() => {
+    return subscribeToNetwork(() => setIsOnline(getNetworkInfo().online));
+  }, []);
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
@@ -74,8 +82,11 @@ export const Sidebar = ({
         </div>
       </nav>
 
-      <div>
-        соединение
+      <div className={styles.connectionInfo}>
+        <span className={`${styles.connectionDot} ${isOnline ? styles.connectionDotOnline : styles.connectionDotOffline}`} />
+        <span className={isOnline ? styles.connectionOnline : styles.connectionOffline}>
+          {isOnline ? 'Соединение активно' : 'Нет соединения'}
+        </span>
       </div>
 
       <div className={styles.sidebarUser}>
