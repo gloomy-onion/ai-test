@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { parse } from 'cookie';
-import { TOKEN_NAME, verifyToken } from '@/shared/lib/auth';
 
 function generateNonce(): string {
   const array = crypto.getRandomValues(new Uint8Array(16));
@@ -9,6 +7,9 @@ function generateNonce(): string {
 
 function buildCspHeader(nonce: string): string {
   const isDev = process.env.NODE_ENV === 'development';
+  const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+    : '';
 
   const scriptSrc = ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", isDev && "'unsafe-eval'"]
     .filter(Boolean)
@@ -31,7 +32,8 @@ function buildCspHeader(nonce: string): string {
       'https://www.google-analytics.com',
       'https://analytics.google.com',
       'https://www.googletagmanager.com',
-    ].join(' '),
+      supabaseOrigin,
+    ].filter(Boolean).join(' '),
     'frame-src https://www.googletagmanager.com',
     "object-src 'none'",
     "base-uri 'self'",
@@ -45,34 +47,13 @@ export const config = {
   matcher: ['/((?!_next|favicon.ico).*)'],
 };
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const nonce = generateNonce();
   const csp = buildCspHeader(nonce);
 
-  const { pathname } = request.nextUrl;
-  const publicPaths = ['/auth', '/api/auth/login'];
-  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+  request.headers.set('x-nonce', nonce);
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
-
-  if (!isPublicPath) {
-    const rawCookies = request.headers.get('cookie');
-    const cookies = rawCookies ? parse(rawCookies) : {};
-    const token = cookies[TOKEN_NAME];
-    const verified = token ? await verifyToken(token) : null;
-
-    if (!verified) {
-      const redirectResponse = NextResponse.redirect(new URL('/auth', request.url));
-      redirectResponse.headers.set('Content-Security-Policy', csp);
-      return redirectResponse;
-    }
-  }
-
-  const response = NextResponse.next({
-    request: { headers: requestHeaders },
-  });
-
+  const response = NextResponse.next({ request });
   response.headers.set('Content-Security-Policy', csp);
 
   return response;

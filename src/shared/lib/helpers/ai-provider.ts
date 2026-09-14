@@ -39,16 +39,39 @@ export const PROVIDERS: Record<string, AIProvider> = {
   },
 };
 
-export const getProvider = (): string => {
-  if (typeof window === 'undefined') {
-    return 'claude';
-  }
+const SETTINGS_ENDPOINT = '/api/user/settings';
 
-  return localStorage.getItem('tc_provider') || 'claude';
+let cachedProvider: string | null = null;
+
+export const loadProvider = async (): Promise<void> => {
+  try {
+    const response = await fetch(SETTINGS_ENDPOINT);
+
+    if (response.ok) {
+      const data = (await response.json()) as { provider?: string };
+      cachedProvider = data.provider ?? 'claude';
+    }
+  } catch (error) {
+    console.error('Failed to load provider:', error);
+  }
 };
 
-export const setProvider = (id: string): void => {
-  localStorage.setItem('tc_provider', id);
+export const getProvider = (): string => {
+  return cachedProvider || 'claude';
+};
+
+export const setProvider = async (id: string): Promise<void> => {
+  cachedProvider = id;
+
+  try {
+    await fetch(SETTINGS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: id }),
+    });
+  } catch (error) {
+    console.error('Failed to save provider:', error);
+  }
 };
 
 export const getApiKey = (provider?: string): string => {

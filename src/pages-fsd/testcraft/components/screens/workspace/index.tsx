@@ -58,25 +58,38 @@ export const WorkspaceScreen = ({
     if (!task) {
       return;
     }
-    const initial = loadDraft(task.id, task.template);
-    setAnswer(initial);
-    setFeedback(null);
-    setError('');
-    setHintText('');
-    setIdealAnswer('');
-    setShowIdealAnswer(false);
-    setSelfScore(0);
-    setShowSelfAssess(false);
-    setHasResult(false);
-    if (hasDraft(task.id, task.template)) {
-      showToast('Загружен сохранённый черновик');
-    }
+
+    let isMounted = true;
+
+    loadDraft(task.id, task.template).then((initial) => {
+      if (!isMounted) {
+        return;
+      }
+      setAnswer(initial);
+      setFeedback(null);
+      setError('');
+      setHintText('');
+      setIdealAnswer('');
+      setShowIdealAnswer(false);
+      setSelfScore(0);
+      setShowSelfAssess(false);
+      setHasResult(false);
+    });
+    hasDraft(task.id, task.template).then((has) => {
+      if (has && isMounted) {
+        showToast('Загружен сохранённый черновик');
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (task) {
-        saveDraft(task.id, answer);
+        void saveDraft(task.id, answer);
       }
     }, 10000);
 
@@ -200,7 +213,7 @@ export const WorkspaceScreen = ({
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (task) {
-          saveDraft(task.id, answer);
+          void saveDraft(task.id, answer);
           showToast('Черновик сохранён ✓');
         }
       }

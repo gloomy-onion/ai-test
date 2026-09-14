@@ -1,6 +1,6 @@
+import { createServerClient } from '@supabase/ssr';
+import { parse, serialize } from 'cookie';
 import type { GetServerSideProps } from 'next';
-import { parse } from 'cookie';
-import { TOKEN_NAME, verifyToken } from '@/shared/lib/auth';
 import { TestCraftPage } from '@/pages-fsd/testcraft';
 
 interface IndexProps {
@@ -12,14 +12,35 @@ export default function Index({ authUser }: IndexProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const rawCookies = context.req.headers.cookie;
-  const cookies = rawCookies ? parse(rawCookies) : {};
-  const token = cookies[TOKEN_NAME];
-  const verified = token ? await verifyToken(token) : null;
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          const raw = context.req.headers.cookie;
+          if (!raw) {
+            return [];
+          }
 
-  if (!verified) {
+          return Object.entries(parse(raw)).map(([name, value]) => ({ name, value: value ?? '' }));
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            context.res.appendHeader('Set-Cookie', serialize(name, value, options));
+          });
+        },
+      },
+    },
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return { redirect: { destination: '/auth', permanent: false } };
   }
 
-  return { props: { authUser: verified.email } };
+  return { props: { authUser: user.email || user.id } };
 };

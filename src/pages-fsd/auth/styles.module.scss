@@ -72,6 +72,26 @@
     font-size: 12px;
 }
 
+.notice {
+    color: #16a34a;
+    font-size: 12px;
+}
+
+.switchBtn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: none;
+    color: #4f46e5;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.switchBtn:hover {
+    text-decoration: underline;
+}
+
 .footer {
     margin-top: 16px;
     text-align: center;

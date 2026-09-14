@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ROUTES } from '@/shared/lib';
+import { createBrowserSupabase } from '@/shared/lib/supabase';
 import styles from './styles.module.scss';
 
 interface MainProps {
@@ -8,10 +9,7 @@ interface MainProps {
 
 export const Main = ({ authUser }: MainProps) => {
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', {
-      method: 'POST',
-    });
-
+    await createBrowserSupabase().auth.signOut();
     window.location.reload();
   };
 

@@ -2,55 +2,77 @@
 
 import { SyntheticEvent, useState } from 'react';
 import { useRouter } from 'next/router';
+import { createBrowserSupabase } from '@/shared/lib/supabase';
 import styles from './styles.module.scss';
 
 export const Auth = () => {
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const supabase = createBrowserSupabase();
 
   const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!email || !password) {
       setError('Fill in all fields');
-
       return;
     }
 
     setError('');
+    setNotice('');
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      if (mode === 'signup') {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        router.push('/');
+        if (signUpError) {
+          setError(signUpError.message);
+        } else if (!data.session) {
+          setNotice('Registration successful! Check your email to confirm your account.');
+        } else {
+          router.push('/');
+        }
       } else {
-        setError(data.error || 'Authentication failed');
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          setError(signInError.message);
+        } else {
+          router.push('/');
+        }
       }
     } catch (error_) {
       setError('Network error. Please try again.');
-      console.error('Login error:', error_);
+      console.error('Auth error:', error_);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const switchMode = () => {
+    setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
+    setError('');
+    setNotice('');
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>Login</h1>
+        <h1 className={styles.title}>{mode === 'login' ? 'Login' : 'Sign up'}</h1>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.field}>
             <label className={styles.label}>Email</label>
@@ -77,12 +99,16 @@ export const Auth = () => {
           </div>
 
           {error && <span className={styles.error}>{error}</span>}
+          {notice && <span className={styles.notice}>{notice}</span>}
 
           <button className={styles.button} type="submit" disabled={isLoading}>
-            {isLoading ? 'Loading...' : 'Login'}
+            {isLoading ? 'Loading...' : mode === 'login' ? 'Login' : 'Create account'}
           </button>
         </form>
-        Email: user@example.com Password: password123
+
+        <button className={styles.switchBtn} type="button" onClick={switchMode} disabled={isLoading}>
+          {mode === 'login' ? 'No account? Sign up' : 'Already have an account? Login'}
+        </button>
       </div>
     </div>
   );

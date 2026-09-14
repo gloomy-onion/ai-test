@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { loadHistory, saveHistory } from '@/shared/lib/helpers/storage';
+import { clearHistory, loadHistory, migrateLegacyHistory, saveHistory } from '@/shared/lib/helpers/storage';
+import { loadProvider, setProvider } from '@/shared/lib/helpers/ai-provider';
+import { createBrowserSupabase } from '@/shared/lib/supabase';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { Header } from './components/header';
 import { DashboardScreen } from './components/screens/dashboard';
@@ -44,7 +46,20 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
   const [tasksFilter, setTasksFilter] = useState('all');
 
   useEffect(() => {
-    setHistory(loadHistory());
+    let isMounted = true;
+
+    migrateLegacyHistory().then(() =>
+      loadHistory().then((entries) => {
+        if (isMounted) {
+          setHistory(entries);
+        }
+      }),
+    );
+    loadProvider();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleNavigate = useCallback((name: string) => {
@@ -57,11 +72,8 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
   }, []);
 
   const handleSaveResult = useCallback((entry: HistoryEntry) => {
-    setHistory((prev) => {
-      const updated = [entry, ...prev];
-      saveHistory(updated);
-      return updated;
-    });
+    setHistory((prev) => [entry, ...prev]);
+    void saveHistory(entry);
   }, []);
 
   const handleUpdateSidebar = useCallback(() => {
@@ -70,7 +82,7 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
 
   const handleClearHistory = useCallback(() => {
     setHistory([]);
-    saveHistory([]);
+    void clearHistory();
   }, []);
 
   const handleFilterTasks = useCallback((type: string) => {
@@ -79,7 +91,7 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
   }, []);
 
   const handleLogout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    await createBrowserSupabase().auth.signOut();
     window.location.href = '/auth';
   }, []);
 

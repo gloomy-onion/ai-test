@@ -1,52 +1,128 @@
 import type { HistoryEntry } from './types';
 
 const HISTORY_KEY = 'testcraft_history';
-const DRAFT_PREFIX = 'testcraft_draft_';
+const HISTORY_ENDPOINT = '/api/user/history';
+const DRAFT_ENDPOINT = '/api/user/draft';
 
-const DEFAULT_ENTRY: Partial<HistoryEntry> = {
-  attempt: 1,
-  selfScore: undefined,
-  prevBestScore: undefined,
+export const migrateLegacyHistory = async (): Promise<void> => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const raw = window.localStorage.getItem(HISTORY_KEY);
+
+  if (!raw) {
+    return;
+  }
+
+  try {
+    const entries = JSON.parse(raw) as HistoryEntry[];
+
+    if (!Array.isArray(entries) || entries.length === 0) {
+      window.localStorage.removeItem(HISTORY_KEY);
+      return;
+    }
+
+    const currentResponse = await fetch(HISTORY_ENDPOINT);
+    const current = currentResponse.ok
+      ? ((await currentResponse.json()) as { history?: HistoryEntry[] })
+      : { history: undefined };
+
+    if (current.history && current.history.length > 0) {
+      window.localStorage.removeItem(HISTORY_KEY);
+      return;
+    }
+
+    const response = await fetch(HISTORY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ history: entries }),
+    });
+
+    if (response.ok) {
+      window.localStorage.removeItem(HISTORY_KEY);
+    }
+  } catch (error) {
+    console.error('Failed to migrate history:', error);
+  }
 };
 
-export const loadHistory = (): HistoryEntry[] => {
-  if (typeof window === 'undefined') {
-    return [];
-  }
+export const loadHistory = async (): Promise<HistoryEntry[]> => {
   try {
-    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') as HistoryEntry[];
-    return raw.map((h) => ({ ...DEFAULT_ENTRY, ...h }));
+    const response = await fetch(HISTORY_ENDPOINT);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = (await response.json()) as { history?: HistoryEntry[] };
+
+    return Array.isArray(data.history) ? data.history : [];
   } catch {
     return [];
   }
 };
 
-export const saveHistory = (history: HistoryEntry[]): void => {
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+export const saveHistory = async (entry: HistoryEntry): Promise<void> => {
+  try {
+    await fetch(HISTORY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entry }),
+    });
+  } catch (error) {
+    console.error('Failed to save history:', error);
+  }
 };
 
-export const loadDraft = (taskId: number | null, defaultTemplate: string): string => {
-  if (!taskId || typeof window === 'undefined') {
+export const clearHistory = async (): Promise<void> => {
+  try {
+    await fetch(HISTORY_ENDPOINT, { method: 'DELETE' });
+  } catch (error) {
+    console.error('Failed to clear history:', error);
+  }
+};
+
+export const loadDraft = async (taskId: number, defaultTemplate: string): Promise<string> => {
+  if (!taskId) {
     return defaultTemplate;
   }
 
-  return localStorage.getItem(`${DRAFT_PREFIX}${taskId}`) || defaultTemplate;
+  try {
+    const response = await fetch(`${DRAFT_ENDPOINT}?task_id=${taskId}`);
+
+    if (!response.ok) {
+      return defaultTemplate;
+    }
+
+    const data = (await response.json()) as { body?: string | null };
+
+    return data.body ?? defaultTemplate;
+  } catch {
+    return defaultTemplate;
+  }
 };
 
-export const saveDraft = (taskId: number | null, value: string): void => {
-  if (!taskId || typeof window === 'undefined') {
+export const saveDraft = async (taskId: number, value: string): Promise<void> => {
+  if (!taskId) {
     return;
   }
-  localStorage.setItem(`${DRAFT_PREFIX}${taskId}`, value);
+
+  try {
+    await fetch(DRAFT_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task_id: taskId, body: value }),
+    });
+  } catch (error) {
+    console.error('Failed to save draft:', error);
+  }
 };
 
-export const hasDraft = (taskId: number, template: string): boolean => {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  const draft = localStorage.getItem(`${DRAFT_PREFIX}${taskId}`);
+export const hasDraft = async (taskId: number, template: string): Promise<boolean> => {
+  const draft = await loadDraft(taskId, template);
 
-  return !!draft && draft !== template;
+  return draft !== template;
 };
 
 export const getAttemptCount = (history: HistoryEntry[], taskId: number): number => {

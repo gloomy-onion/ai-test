@@ -30,7 +30,7 @@ export const SettingsScreen = () => {
 
   const handleSelect = (id: string) => {
     setSelected(id);
-    setProvider(id);
+    void setProvider(id);
     setKeyInput(getApiKey(id));
     setStatus(null);
   };

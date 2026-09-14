@@ -1,5 +1,4 @@
 export { ROUTES } from './config';
-export { TOKEN_NAME, TOKEN_MAX_AGE, createToken, verifyToken } from './auth';
 export { TASKS, THEORY_TOPICS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
 export {
   PROVIDERS,
@@ -14,7 +13,15 @@ export { getUserInitials } from '@/shared/lib/helpers/user';
 export { writeClipboard, readClipboard } from '@/shared/lib/helpers/clipboard';
 export { getNetworkInfo, subscribeToNetwork } from '@/shared/lib/helpers/network';
 export type { NetworkInfo } from '@/shared/lib/helpers/network';
-export { loadHistory, saveHistory, loadDraft, saveDraft } from '@/shared/lib/helpers/storage';
+export {
+  loadHistory,
+  saveHistory,
+  clearHistory,
+  migrateLegacyHistory,
+  loadDraft,
+  saveDraft,
+  hasDraft,
+} from '@/shared/lib/helpers/storage';
 export type {
   Task,
   HistoryEntry,
