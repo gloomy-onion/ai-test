@@ -1,18 +1,14 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useQuery } from '@tanstack/react-query';
+import { historyOptions } from '@/shared/api';
 import { TASKS } from '@/shared/lib/helpers/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { TaskCard } from '@/shared/ui';
 import '@/shared/ui/atoms/pagination';
 import styles from './styles.module.scss';
-
-interface TasksListScreenProps {
-  history: HistoryEntry[];
-  onOpenTask: (id: number) => void;
-  initialFilter?: string;
-  onFilterChange?: (filter: string) => void;
-}
 
 const TABS = [
   { id: 'all', label: 'Все задания' },
@@ -24,20 +20,29 @@ const TABS = [
 
 const PAGE_SIZE = 12;
 
-export const TasksListScreen = ({
-  history,
-  onOpenTask,
-  initialFilter = 'all',
-  onFilterChange,
-}: TasksListScreenProps) => {
+export const TasksListScreen = () => {
+  const router = useRouter();
+  const initialFilter = (router.query.filter as string) || 'all';
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [currentPage, setCurrentPage] = useState(1);
-
+  const { data: history = [] } = useQuery(historyOptions());
   const paginationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (router.query.filter && router.query.filter !== activeFilter) {
+      setActiveFilter(router.query.filter as string);
+      setCurrentPage(1);
+    }
+  }, [router.query.filter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilter = (id: string) => {
     setActiveFilter(id);
-    onFilterChange?.(id);
+    setCurrentPage(1);
+    if (id === 'all') {
+      router.push('/tasks', undefined, { shallow: true });
+    } else {
+      router.push(`/tasks?filter=${id}`, undefined, { shallow: true });
+    }
   };
 
   const solvedIds = useMemo(() => {
@@ -54,10 +59,6 @@ export const TasksListScreen = ({
   const filtered = activeFilter === 'all' ? TASKS : TASKS.filter((t) => t.type === activeFilter);
 
   const totalPages = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [activeFilter]);
 
   useEffect(() => {
     const el = paginationRef.current?.querySelector('pagination-element');
@@ -117,7 +118,12 @@ export const TasksListScreen = ({
       </div>
       <div className={styles.tasksGrid}>
         {paginatedTasks.map((task) => (
-          <TaskCard key={task.id} task={task} history={history} onOpen={onOpenTask} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            history={history}
+            onOpen={(id) => router.push(`/tasks/${id}`)}
+          />
         ))}
       </div>
       <div className={styles.paginationWrapper} ref={paginationRef}>

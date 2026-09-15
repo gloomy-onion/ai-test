@@ -1,19 +1,20 @@
 'use client';
 
+import { useRouter } from 'next/router';
+import { useQuery } from '@tanstack/react-query';
+import { historyOptions } from '@/shared/api';
 import { TASKS } from '@/shared/lib/helpers/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { getTotalXP, getLevelInfo, getStreakInfo, getCategoryProgress } from '@/shared/lib/helpers/xp-system';
 import { buildMiniChart } from '@/shared/lib/helpers/mini-chart';
-import {StatCard, TaskCard} from '@/shared/ui';
+import { StatCard, TaskCard } from '@/shared/ui';
 import '@/shared/ui/atoms/progress-bar';
 import styles from './styles.module.scss';
 
-interface DashboardScreenProps {
-  history: HistoryEntry[];
-  onOpenTask: (id: number) => void;
-}
+export const DashboardScreen = () => {
+  const router = useRouter();
+  const { data: history = [] } = useQuery(historyOptions());
 
-export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) => {
   const xp = getTotalXP(history);
   const lvl = getLevelInfo(xp);
   const bestByTask = new Map<number, HistoryEntry>();
@@ -114,7 +115,12 @@ export const DashboardScreen = ({ history, onOpenTask }: DashboardScreenProps) =
 
       <div className={styles.tasksGrid}>
         {featured.map((task) => (
-          <TaskCard key={task.id} task={task} history={history} onOpen={onOpenTask} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            history={history}
+            onOpen={(id) => router.push(`/tasks/${id}`)}
+          />
         ))}
       </div>
     </>

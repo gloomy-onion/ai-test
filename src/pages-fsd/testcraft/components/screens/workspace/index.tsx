@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/router';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   callClaude,
   buildPrompt,
@@ -10,7 +11,7 @@ import {
   getProvider,
   getApiKey,
 } from '@/shared/lib/helpers/ai-provider';
-import { draftApi, draftOptions, draftQueryKey } from '@/shared/api';
+import { historyApi, draftApi, draftOptions, historyOptions, HISTORY_QUERY_KEY } from '@/shared/api';
 import { getAttemptCount, getBestScore } from '@/shared/lib/helpers/history-utils';
 import { TASKS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
 import { calculateRetryXP } from '@/shared/lib/helpers/xp-system';
@@ -21,22 +22,12 @@ import '@/shared/ui/atoms/markdown';
 import { FeedbackPanel } from '../../feedback';
 import styles from './styles.module.scss';
 
-interface WorkspaceScreenProps {
-  taskId: number;
-  history: HistoryEntry[];
-  onBack: () => void;
-  onSaveResult: (entry: HistoryEntry) => void;
-  onUpdateSidebar: () => void;
-}
-
-export const WorkspaceScreen = ({
-  taskId,
-  history,
-  onBack,
-  onSaveResult,
-  onUpdateSidebar,
-}: WorkspaceScreenProps) => {
+export const WorkspaceScreen = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const taskId = Number(router.query.id);
   const task = TASKS.find((t) => t.id === taskId);
+  const { data: history = [] } = useQuery(historyOptions());
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState<FeedbackResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -113,7 +104,7 @@ export const WorkspaceScreen = ({
     const prov = getProvider();
     if (prov !== 'claude' && !getApiKey()) {
       showToast('Добавьте API-ключ в Настройках API ⚙', 'var(--danger)');
-      onBack();
+      router.push('/settings');
       return;
     }
     setLoading(true);
@@ -140,8 +131,13 @@ export const WorkspaceScreen = ({
         selfScore: selfScore > 0 ? selfScore : undefined,
         prevBestScore: prevBest?.score,
       };
-      onSaveResult(entry);
-      onUpdateSidebar();
+
+      queryClient.setQueryData<HistoryEntry[]>([HISTORY_QUERY_KEY], (prev) => [
+        entry,
+        ...(prev ?? []),
+      ]);
+      await historyApi.add(entry);
+      void queryClient.invalidateQueries({ queryKey: [HISTORY_QUERY_KEY] });
 
       if (prevBest && result.score > prevBest.score) {
         showToast(`Улучшение! +${earned} XP 🎉`, 'var(--accent3)');
@@ -154,7 +150,7 @@ export const WorkspaceScreen = ({
       setError(error_ instanceof Error ? error_.message : 'Не удалось получить ответ от AI.');
     }
     setLoading(false);
-  }, [task, answer, prevBest, attempt, selfScore, onBack, onSaveResult, onUpdateSidebar]);
+  }, [task, answer, prevBest, attempt, selfScore, router, queryClient]);
 
   const handleGetHint = useCallback(async () => {
     if (!task) {
@@ -437,7 +433,7 @@ export const WorkspaceScreen = ({
                 earnedXP={earnedXP}
                 selfScore={selfScore > 0 ? selfScore : undefined}
                 prevBestScore={prevBest?.score}
-                onBack={onBack}
+                onBack={() => router.push('/tasks')}
               />
             )}
           </div>

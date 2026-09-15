@@ -1,5 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/router';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { historyApi, historyOptions, HISTORY_QUERY_KEY } from '@/shared/api';
 import { TASKS } from '@/shared/lib/helpers/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/helpers/xp-system';
@@ -10,13 +13,16 @@ import '@/shared/ui/atoms/badge-pill';
 import '@/shared/ui/atoms/progress-bar';
 import styles from './styles.module.scss';
 
-interface ProfileScreenProps {
-  history: HistoryEntry[];
-  onOpenTask: (id: number) => void;
-  onClearHistory: () => void;
-}
+export const ProfileScreen = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { data: history = [] } = useQuery(historyOptions());
 
-export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileScreenProps) => {
+  const clearMutation = useMutation({
+    mutationFn: () => historyApi.clear(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [HISTORY_QUERY_KEY] }),
+  });
+
   const xp = getTotalXP(history);
   const lvl = getLevelInfo(xp);
   const uniqueTasks = new Set(history.map((h) => h.taskId));
@@ -122,7 +128,7 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
       <div className={styles.sectionTitle}>Лучшие результаты</div>
       {sorted.length ? (
         sorted.map((h) => (
-          <HistoryRow key={`${h.taskId}-${h.date}`} entry={h} onRepeat={onOpenTask} />
+          <HistoryRow key={`${h.taskId}-${h.date}`} entry={h} onRepeat={(id) => router.push(`/tasks/${id}`)} />
         ))
       ) : (
         <div className={styles.emptyMessage}>
@@ -134,7 +140,7 @@ export const ProfileScreen = ({ history, onOpenTask, onClearHistory }: ProfileSc
         <button-element variant="danger" size="sm" onClick={() => {
           // eslint-disable-next-line no-alert
           if (window.confirm('Сбросить весь прогресс? Это действие нельзя отменить.')) {
-            onClearHistory();
+            clearMutation.mutate();
           }
         }}>
           Сбросить прогресс

@@ -1,15 +1,15 @@
 'use client';
 
-import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { useRouter } from 'next/router';
+import { useQuery } from '@tanstack/react-query';
+import { historyOptions } from '@/shared/api';
 import { HistoryRow } from '@/shared/ui';
 import styles from './styles.module.scss';
 
-interface HistoryScreenProps {
-  history: HistoryEntry[];
-  onOpenTask: (id: number) => void;
-}
+export const HistoryScreen = () => {
+  const router = useRouter();
+  const { data: history = [] } = useQuery(historyOptions());
 
-export const HistoryScreen = ({ history, onOpenTask }: HistoryScreenProps) => {
   if (!history.length) {
     return (
       <>
@@ -36,9 +36,9 @@ export const HistoryScreen = ({ history, onOpenTask }: HistoryScreenProps) => {
       </div>
       {sorted.map((h) => (
         <HistoryRow
-          key={`${h.taskId}-${h.date}-${h.attempt}-${Math.random()}`}
+          key={`${h.taskId}-${h.date}-${h.attempt}`}
           entry={h}
-          onRepeat={onOpenTask}
+          onRepeat={(id) => router.push(`/tasks/${id}`)}
         />
       ))}
     </>

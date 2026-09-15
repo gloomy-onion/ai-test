@@ -1,35 +1,46 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useQuery } from '@tanstack/react-query';
 import { NAV_ITEMS, FILTER_ITEMS } from '@/shared/lib/config';
+import { historyOptions } from '@/shared/api';
 import { getRemainingTasks } from '@/shared/lib/helpers/tasks-data';
 import { getUserInitials } from '@/shared/lib/helpers/user';
 import { getNetworkInfo, subscribeToNetwork } from '@/shared/lib/helpers/network';
 import { getTotalXP, getLevelInfo } from '@/shared/lib/helpers/xp-system';
-import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { createBrowserSupabase } from '@/shared/lib/supabase';
 import styles from './styles.module.scss';
 
 interface SidebarProps {
-  currentScreen: string;
-  history: HistoryEntry[];
   authUser: string;
-  onNavigate: (screen: string) => void;
-  onFilterTasks: (type: string) => void;
-  onLogout: () => void;
-  activeFilter?: string;
 }
 
-export const Sidebar = ({
-  currentScreen,
-  history,
-  authUser,
-  onNavigate,
-  onFilterTasks,
-  onLogout,
-  activeFilter,
-}: SidebarProps) => {
+const TASK_FILTER_ROUTES: Record<string, string> = {
+  functional: '/tasks?filter=functional',
+  api: '/tasks?filter=api',
+  ui: '/tasks?filter=ui',
+  bug: '/tasks?filter=bug',
+};
+
+const ACTIVE_SCREEN_MAP: Record<string, string> = {
+  '/dashboard': 'dashboard',
+  '/tasks': 'tasks',
+  '/history': 'history',
+  '/theory': 'theory',
+  '/profile': 'profile',
+  '/settings': 'settings',
+};
+
+export const Sidebar = ({ authUser }: SidebarProps) => {
+  const router = useRouter();
+  const { data: history = [] } = useQuery(historyOptions());
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
+
+  const activeScreen = ACTIVE_SCREEN_MAP[router.pathname] || '';
+  const activeFilter = router.query.filter as string | undefined;
 
   const [isOnline, setIsOnline] = useState(false);
 
@@ -38,47 +49,52 @@ export const Sidebar = ({
     return subscribeToNetwork(() => setIsOnline(getNetworkInfo().online));
   }, []);
 
+  const handleLogout = async () => {
+    await createBrowserSupabase().auth.signOut();
+    window.location.href = '/auth';
+  };
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logo}>
-        <a className={styles.logoMark}>
+        <Link href="/dashboard" className={styles.logoMark}>
           <div className={styles.logoIcon}>⚙</div>
           <div>
             <div>TestCraft AI</div>
             <div className={styles.logoSub}>QA Learning Platform</div>
           </div>
-        </a>
+        </Link>
       </div>
 
       <nav className={styles.nav}>
         <div className={styles.navSection}>
           <div className={styles.navLabel}>Навигация</div>
           {NAV_ITEMS.map((item) => (
-            <div
+            <Link
               key={item.id}
-              className={`${styles.navItem} ${currentScreen === item.id ? styles.navItemActive : ''}`}
-              onClick={() => onNavigate(item.id)}
+              href={item.href}
+              className={`${styles.navItem} ${activeScreen === item.id ? styles.navItemActive : ''}`}
             >
               <div className={styles.navDot} />
               {item.label}
               {item.id === 'tasks' ? (
                 <span className={styles.navBadge}>{getRemainingTasks(history)}</span>
               ) : null}
-            </div>
+            </Link>
           ))}
         </div>
 
         <div className={styles.navSection}>
           <div className={styles.navLabel}>Виды тестирования</div>
           {FILTER_ITEMS.map((item) => (
-            <div
+            <Link
               key={item.id}
+              href={TASK_FILTER_ROUTES[item.id]}
               className={`${styles.navItem} ${activeFilter === item.id ? styles.navItemActive : ''}`}
-              onClick={() => onFilterTasks(item.id)}
             >
               <div className={styles.navDot} />
               {item.label}
-            </div>
+            </Link>
           ))}
         </div>
       </nav>
@@ -101,7 +117,7 @@ export const Sidebar = ({
       </div>
 
       <div className={styles.logoutWrap}>
-        <button className={styles.logoutBtn} onClick={onLogout}>
+        <button className={styles.logoutBtn} onClick={handleLogout}>
           Выйти
         </button>
       </div>
