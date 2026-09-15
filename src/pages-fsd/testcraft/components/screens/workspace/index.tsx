@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   callClaude,
   buildPrompt,
@@ -9,7 +10,8 @@ import {
   getProvider,
   getApiKey,
 } from '@/shared/lib/helpers/ai-provider';
-import { loadDraft, saveDraft, hasDraft, getAttemptCount, getBestScore } from '@/shared/lib/helpers/storage';
+import { draftApi, draftOptions, draftQueryKey } from '@/shared/api';
+import { getAttemptCount, getBestScore } from '@/shared/lib/helpers/history-utils';
 import { TASKS, HINTS_MAP } from '@/shared/lib/helpers/tasks-data';
 import { calculateRetryXP } from '@/shared/lib/helpers/xp-system';
 import { writeClipboard, readClipboard } from '@/shared/lib/helpers/clipboard';
@@ -49,52 +51,53 @@ export const WorkspaceScreen = ({
   const [showSelfAssess, setShowSelfAssess] = useState(false);
   const [hasResult, setHasResult] = useState(false);
   const [preview, setPreview] = useState(false);
+  const loadedRef = useRef<number | null>(null);
 
   const attempt = getAttemptCount(history, taskId);
   const prevBest = getBestScore(history, taskId);
   const isRetry = attempt > 1;
+
+  const { data: draftBody } = useQuery(draftOptions(taskId));
+  const saveDraftMutation = useMutation({
+    mutationFn: ({ taskId: tid, body }: { taskId: number; body: string }) => draftApi.save(tid, body),
+  });
 
   useEffect(() => {
     if (!task) {
       return;
     }
 
-    let isMounted = true;
+    if (loadedRef.current === task.id) {
+      return;
+    }
 
-    loadDraft(task.id, task.template).then((initial) => {
-      if (!isMounted) {
-        return;
-      }
-      setAnswer(initial);
-      setFeedback(null);
-      setError('');
-      setHintText('');
-      setIdealAnswer('');
-      setShowIdealAnswer(false);
-      setSelfScore(0);
-      setShowSelfAssess(false);
-      setHasResult(false);
-    });
-    hasDraft(task.id, task.template).then((has) => {
-      if (has && isMounted) {
-        showToast('Загружен сохранённый черновик');
-      }
-    });
+    loadedRef.current = task.id;
+    setAnswer(draftBody ?? task.template);
+    setFeedback(null);
+    setError('');
+    setHintText('');
+    setIdealAnswer('');
+    setShowIdealAnswer(false);
+    setSelfScore(0);
+    setShowSelfAssess(false);
+    setHasResult(false);
 
-    return () => {
-      isMounted = false;
-    };
-  }, [task]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (draftBody !== null && draftBody !== undefined && draftBody !== task.template) {
+      showToast('Загружен сохранённый черновик');
+    }
+  }, [task, draftBody]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!task) {
+      return;
+    }
+
     const interval = setInterval(() => {
-      if (task) {
-        void saveDraft(task.id, answer);
-      }
+      saveDraftMutation.mutate({ taskId: task.id, body: answer });
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [task, answer]);
+  }, [task, answer, saveDraftMutation]);
 
   const chars = answer.length;
   const lines = answer.split('\n').length;
@@ -213,7 +216,7 @@ export const WorkspaceScreen = ({
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (task) {
-          void saveDraft(task.id, answer);
+          saveDraftMutation.mutate({ taskId: task.id, body: answer });
           showToast('Черновик сохранён ✓');
         }
       }
@@ -221,7 +224,7 @@ export const WorkspaceScreen = ({
     document.addEventListener('keydown', handler);
 
     return () => document.removeEventListener('keydown', handler);
-  }, [task, answer, loading, handleSubmit]);
+  }, [task, answer, loading, handleSubmit, saveDraftMutation]);
 
   if (!task) {
     return <div className={styles.emptyState}>Задание не найдено</div>;

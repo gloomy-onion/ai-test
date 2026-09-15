@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { clearHistory, loadHistory, migrateLegacyHistory, saveHistory } from '@/shared/lib/helpers/storage';
-import { loadProvider, setProvider } from '@/shared/lib/helpers/ai-provider';
+import { useQuery, useMutation, useQueryClient, HydrationBoundary, type DehydratedState } from '@tanstack/react-query';
+import { historyApi, historyOptions, settingsOptions, HISTORY_QUERY_KEY } from '@/shared/api';
+import { cacheProvider } from '@/shared/lib/helpers/ai-provider';
+import { migrateLegacyHistory } from '@/shared/lib/helpers/legacy-history';
 import { createBrowserSupabase } from '@/shared/lib/supabase';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { Header } from './components/header';
@@ -18,6 +20,7 @@ import styles from './styles.module.scss';
 
 interface TestCraftPageProps {
   authUser: string;
+  dehydratedState?: DehydratedState;
 }
 
 type ScreenName =
@@ -39,28 +42,36 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   settings: ['Настройки API', 'Провайдер и ключ для проверки заданий'],
 };
 
-export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
+export const TestCraftPage = ({ authUser, dehydratedState }: TestCraftPageProps) => {
+  const queryClient = useQueryClient();
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('dashboard');
   const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [tasksFilter, setTasksFilter] = useState('all');
 
+  const { data: history = [] } = useQuery(historyOptions());
+  const { data: provider } = useQuery(settingsOptions());
+
   useEffect(() => {
-    let isMounted = true;
+    if (provider) {
+      cacheProvider(provider);
+    }
+  }, [provider]);
 
-    migrateLegacyHistory().then(() =>
-      loadHistory().then((entries) => {
-        if (isMounted) {
-          setHistory(entries);
-        }
-      }),
-    );
-    loadProvider();
+  useEffect(() => {
+    void migrateLegacyHistory().then(() => {
+      void queryClient.invalidateQueries({ queryKey: [HISTORY_QUERY_KEY] });
+    });
+  }, [queryClient]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const saveMutation = useMutation({
+    mutationFn: (entry: HistoryEntry) => historyApi.add(entry),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [HISTORY_QUERY_KEY] }),
+  });
+
+  const clearMutation = useMutation({
+    mutationFn: () => historyApi.clear(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [HISTORY_QUERY_KEY] }),
+  });
 
   const handleNavigate = useCallback((name: string) => {
     setCurrentScreen(name as ScreenName);
@@ -71,19 +82,19 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
     setCurrentScreen('workspace');
   }, []);
 
-  const handleSaveResult = useCallback((entry: HistoryEntry) => {
-    setHistory((prev) => [entry, ...prev]);
-    void saveHistory(entry);
-  }, []);
+  const handleSaveResult = useCallback(
+    (entry: HistoryEntry) => {
+      queryClient.setQueryData<HistoryEntry[]>([HISTORY_QUERY_KEY], (prev) => [entry, ...(prev ?? [])]);
+      saveMutation.mutate(entry);
+    },
+    [queryClient, saveMutation],
+  );
 
-  const handleUpdateSidebar = useCallback(() => {
-    // sidebar reads from history prop, re-render is automatic
-  }, []);
+  const handleUpdateSidebar = useCallback(() => {}, []);
 
   const handleClearHistory = useCallback(() => {
-    setHistory([]);
-    void clearHistory();
-  }, []);
+    clearMutation.mutate();
+  }, [clearMutation]);
 
   const handleFilterTasks = useCallback((type: string) => {
     setTasksFilter(type);
@@ -99,50 +110,52 @@ export const TestCraftPage = ({ authUser }: TestCraftPageProps) => {
     currentScreen === 'workspace' ? ['', ''] : SCREEN_TITLES[currentScreen] || ['', ''];
 
   return (
-    <div className={styles.app} data-theme="dark">
-      <Sidebar
-        currentScreen={currentScreen}
-        history={history}
-        authUser={authUser}
-        onNavigate={handleNavigate}
-        onFilterTasks={handleFilterTasks}
-        onLogout={handleLogout}
-        activeFilter={currentScreen === 'tasks' ? tasksFilter : undefined}
-      />
+    <HydrationBoundary state={dehydratedState}>
+      <div className={styles.app} data-theme="dark">
+        <Sidebar
+          currentScreen={currentScreen}
+          history={history}
+          authUser={authUser}
+          onNavigate={handleNavigate}
+          onFilterTasks={handleFilterTasks}
+          onLogout={handleLogout}
+          activeFilter={currentScreen === 'tasks' ? tasksFilter : undefined}
+        />
 
-      <div className={styles.main}>
-        {currentScreen !== 'workspace' && <Header title={title} subtitle={subtitle} />}
+        <div className={styles.main}>
+          {currentScreen !== 'workspace' && <Header title={title} subtitle={subtitle} />}
 
-        <div className={styles.content}>
-          {currentScreen === 'dashboard' && (
-            <DashboardScreen history={history} onOpenTask={handleOpenTask} />
-          )}
-          {currentScreen === 'tasks' && (
-            <TasksListScreen key={tasksFilter} history={history} onOpenTask={handleOpenTask} initialFilter={tasksFilter} onFilterChange={setTasksFilter} />
-          )}
-          {currentScreen === 'history' && (
-            <HistoryScreen history={history} onOpenTask={handleOpenTask} />
-          )}
-          {currentScreen === 'workspace' && currentTaskId && (
-            <WorkspaceScreen
-              taskId={currentTaskId}
-              history={history}
-              onBack={() => handleNavigate('tasks')}
-              onSaveResult={handleSaveResult}
-              onUpdateSidebar={handleUpdateSidebar}
-            />
-          )}
-          {currentScreen === 'theory' && <TheoryScreen />}
-          {currentScreen === 'profile' && (
-            <ProfileScreen
-              history={history}
-              onOpenTask={handleOpenTask}
-              onClearHistory={handleClearHistory}
-            />
-          )}
-          {currentScreen === 'settings' && <SettingsScreen />}
+          <div className={styles.content}>
+            {currentScreen === 'dashboard' && (
+              <DashboardScreen history={history} onOpenTask={handleOpenTask} />
+            )}
+            {currentScreen === 'tasks' && (
+              <TasksListScreen key={tasksFilter} history={history} onOpenTask={handleOpenTask} initialFilter={tasksFilter} onFilterChange={setTasksFilter} />
+            )}
+            {currentScreen === 'history' && (
+              <HistoryScreen history={history} onOpenTask={handleOpenTask} />
+            )}
+            {currentScreen === 'workspace' && currentTaskId && (
+              <WorkspaceScreen
+                taskId={currentTaskId}
+                history={history}
+                onBack={() => handleNavigate('tasks')}
+                onSaveResult={handleSaveResult}
+                onUpdateSidebar={handleUpdateSidebar}
+              />
+            )}
+            {currentScreen === 'theory' && <TheoryScreen />}
+            {currentScreen === 'profile' && (
+              <ProfileScreen
+                history={history}
+                onOpenTask={handleOpenTask}
+                onClearHistory={handleClearHistory}
+              />
+            )}
+            {currentScreen === 'settings' && <SettingsScreen />}
+          </div>
         </div>
       </div>
-    </div>
+    </HydrationBoundary>
   );
 };

@@ -39,21 +39,12 @@ export const PROVIDERS: Record<string, AIProvider> = {
   },
 };
 
-const SETTINGS_ENDPOINT = '/api/user/settings';
+import { settingsApi } from '@/shared/api/requests/settings';
 
 let cachedProvider: string | null = null;
 
-export const loadProvider = async (): Promise<void> => {
-  try {
-    const response = await fetch(SETTINGS_ENDPOINT);
-
-    if (response.ok) {
-      const data = (await response.json()) as { provider?: string };
-      cachedProvider = data.provider ?? 'claude';
-    }
-  } catch (error) {
-    console.error('Failed to load provider:', error);
-  }
+export const cacheProvider = (id: string): void => {
+  cachedProvider = id;
 };
 
 export const getProvider = (): string => {
@@ -61,17 +52,8 @@ export const getProvider = (): string => {
 };
 
 export const setProvider = async (id: string): Promise<void> => {
-  cachedProvider = id;
-
-  try {
-    await fetch(SETTINGS_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider: id }),
-    });
-  } catch (error) {
-    console.error('Failed to save provider:', error);
-  }
+  cacheProvider(id);
+  await settingsApi.update(id);
 };
 
 export const getApiKey = (provider?: string): string => {

@@ -1,38 +1,50 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { PROVIDERS } from '@/shared/lib/helpers/ai-provider';
 import {
-  PROVIDERS,
-  getProvider,
-  setProvider,
+  cacheProvider,
   getApiKey,
   setApiKey,
   removeApiKey,
   testApiConnection,
 } from '@/shared/lib/helpers/ai-provider';
+import { settingsApi, settingsOptions, SETTINGS_QUERY_KEY } from '@/shared/api';
 import '@/shared/ui/atoms/button';
-import '@/shared/ui/atoms/popover'
+import '@/shared/ui/atoms/popover';
 import styles from './styles.module.scss';
 
 export const SettingsScreen = () => {
-  const [selected, setSelected] = useState('');
+  const queryClient = useQueryClient();
   const [keyInput, setKeyInput] = useState('');
   const [status, setStatus] = useState<{ type: string; text: string } | null>(null);
   const [testing, setTesting] = useState(false);
   const popoverRef = useRef<HTMLElement | null>(null);
 
+  const { data: selected = 'claude' } = useQuery(settingsOptions());
+
   useEffect(() => {
-    const prov = getProvider();
-    setSelected(prov);
-    setKeyInput(getApiKey(prov));
+    setKeyInput(getApiKey(selected));
     setStatus(null);
-  }, []);
+  }, [selected]);
+
+  const selectMutation = useMutation({
+    mutationFn: (id: string) => settingsApi.update(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: [SETTINGS_QUERY_KEY] });
+      queryClient.setQueryData([SETTINGS_QUERY_KEY], id);
+      cacheProvider(id);
+    },
+    onError: () => {
+      void queryClient.invalidateQueries({ queryKey: [SETTINGS_QUERY_KEY] });
+    },
+  });
 
   const handleSelect = (id: string) => {
-    setSelected(id);
-    void setProvider(id);
-    setKeyInput(getApiKey(id));
-    setStatus(null);
+    if (id !== selected) {
+      selectMutation.mutate(id);
+    }
   };
 
   const handleSave = () => {

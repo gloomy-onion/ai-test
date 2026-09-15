@@ -13,15 +13,8 @@ export { getUserInitials } from '@/shared/lib/helpers/user';
 export { writeClipboard, readClipboard } from '@/shared/lib/helpers/clipboard';
 export { getNetworkInfo, subscribeToNetwork } from '@/shared/lib/helpers/network';
 export type { NetworkInfo } from '@/shared/lib/helpers/network';
-export {
-  loadHistory,
-  saveHistory,
-  clearHistory,
-  migrateLegacyHistory,
-  loadDraft,
-  saveDraft,
-  hasDraft,
-} from '@/shared/lib/helpers/storage';
+export { migrateLegacyHistory } from '@/shared/lib/helpers/legacy-history';
+export { getAttemptCount, getBestScore } from '@/shared/lib/helpers/history-utils';
 export type {
   Task,
   HistoryEntry,
