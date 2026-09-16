@@ -4,13 +4,12 @@ import { TasksListScreen } from '@/pages-fsd/testcraft/components/screens/tasks-
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface TasksPageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function TasksPage({ authUser }: TasksPageProps) {
+export default function TasksPage() {
   return (
-    <AppLayout title="Задания" subtitle="Выберите задание для практики" authUser={authUser}>
+    <AppLayout title="Задания" subtitle="Выберите задание для практики">
       <TasksListScreen />
     </AppLayout>
   );

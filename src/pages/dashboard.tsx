@@ -4,13 +4,12 @@ import { DashboardScreen } from '@/pages-fsd/testcraft/components/screens/dashbo
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface DashboardPageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function DashboardPage({ authUser }: DashboardPageProps) {
+export default function DashboardPage() {
   return (
-    <AppLayout title="Дашборд" subtitle="Добро пожаловать в TestCraft AI" authUser={authUser}>
+    <AppLayout title="Дашборд" subtitle="Добро пожаловать в TestCraft AI">
       <DashboardScreen />
     </AppLayout>
   );

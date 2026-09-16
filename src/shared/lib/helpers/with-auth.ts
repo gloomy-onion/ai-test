@@ -2,8 +2,9 @@ import { createServerClient } from '@supabase/ssr';
 import { parse, serialize } from 'cookie';
 import { QueryClient, dehydrate } from '@tanstack/react-query';
 import type { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { HISTORY_QUERY_KEY, SETTINGS_QUERY_KEY } from '@/shared/api';
+import { HISTORY_QUERY_KEY, SETTINGS_QUERY_KEY, USER_QUERY_KEY } from '@/shared/api';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import type { CurrentUser } from '@/shared/api/requests/user';
 
 interface HistoryRow {
   task_id: number;
@@ -31,6 +32,8 @@ const prefetchAppData = async (
   supabase: ReturnType<typeof createServerClient>,
   queryClient: QueryClient,
   userId: string,
+  username: string,
+  email: string,
 ) => {
   const [historyResult, settingsResult] = await Promise.all([
     supabase
@@ -51,6 +54,8 @@ const prefetchAppData = async (
   if (!settingsResult.error) {
     queryClient.setQueryData([SETTINGS_QUERY_KEY], settingsResult.data?.provider ?? 'claude');
   }
+
+  queryClient.setQueryData<CurrentUser>([USER_QUERY_KEY], { email, username });
 };
 
 export const withAuth = (): GetServerSideProps => {
@@ -81,15 +86,19 @@ export const withAuth = (): GetServerSideProps => {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return { redirect: { destination: '/auth', permanent: false } };
+      return {
+        redirect: { destination: `/auth?next=${encodeURIComponent(context.resolvedUrl)}`, permanent: false },
+      };
     }
 
     const queryClient = new QueryClient();
-    await prefetchAppData(supabase, queryClient, user.id);
+    const metadata = user.user_metadata as Record<string, unknown> | undefined;
+    const username = typeof metadata?.username === 'string' ? metadata.username : '';
+    const email = user.email ?? user.id;
+    await prefetchAppData(supabase, queryClient, user.id, username, email);
 
     return {
       props: {
-        authUser: user.email || user.id,
         dehydratedState: dehydrate(queryClient),
       },
     };

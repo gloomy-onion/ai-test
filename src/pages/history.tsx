@@ -4,13 +4,12 @@ import { HistoryScreen } from '@/pages-fsd/testcraft/components/screens/history'
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface HistoryPageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function HistoryPage({ authUser }: HistoryPageProps) {
+export default function HistoryPage() {
   return (
-    <AppLayout title="История" subtitle="Ваши выполненные задания" authUser={authUser}>
+    <AppLayout title="История" subtitle="Ваши выполненные задания">
       <HistoryScreen />
     </AppLayout>
   );

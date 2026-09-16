@@ -10,7 +10,8 @@ import {
   removeApiKey,
   testApiConnection,
 } from '@/shared/lib/helpers/ai-provider';
-import { settingsApi, settingsOptions, SETTINGS_QUERY_KEY } from '@/shared/api';
+import { settingsApi, settingsOptions, SETTINGS_QUERY_KEY, userOptions, USER_QUERY_KEY } from '@/shared/api';
+import { createBrowserSupabase } from '@/shared/lib/supabase';
 import '@/shared/ui/atoms/button';
 import '@/shared/ui/atoms/popover';
 import styles from './styles.module.scss';
@@ -18,16 +19,24 @@ import styles from './styles.module.scss';
 export const SettingsScreen = () => {
   const queryClient = useQueryClient();
   const [keyInput, setKeyInput] = useState('');
+  const [usernameInput, setUsernameInput] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<{ type: string; text: string } | null>(null);
   const [status, setStatus] = useState<{ type: string; text: string } | null>(null);
   const [testing, setTesting] = useState(false);
   const popoverRef = useRef<HTMLElement | null>(null);
 
   const { data: selected = 'claude' } = useQuery(settingsOptions());
+  const { data: currentUser } = useQuery(userOptions());
 
   useEffect(() => {
     setKeyInput(getApiKey(selected));
     setStatus(null);
   }, [selected]);
+
+  useEffect(() => {
+    setUsernameInput(currentUser?.username ?? '');
+    setUsernameStatus(null);
+  }, [currentUser]);
 
   const selectMutation = useMutation({
     mutationFn: (id: string) => settingsApi.update(id),
@@ -70,6 +79,27 @@ export const SettingsScreen = () => {
     const result = await testApiConnection(selected, keyInput || getApiKey(selected));
     setStatus({ type: result.ok ? 'success' : 'error', text: result.message });
     setTesting(false);
+  };
+
+  const handleUsernameSave = async () => {
+    const trimmed = usernameInput.trim();
+    if (trimmed.length < 2 || trimmed.length > 30) {
+      setUsernameStatus({ type: 'error', text: 'Имя должно быть от 2 до 30 символов' });
+      return;
+    }
+
+    try {
+      const { error } = await createBrowserSupabase().auth.updateUser({ data: { username: trimmed } });
+      if (error) {
+        setUsernameStatus({ type: 'error', text: error.message });
+        return;
+      }
+      setUsernameStatus({ type: 'success', text: 'Имя сохранено ✓' });
+      void queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY] });
+      setTimeout(() => setUsernameStatus(null), 3000);
+    } catch {
+      setUsernameStatus({ type: 'error', text: 'Network error. Please try again.' });
+    }
   };
 
   const prov = PROVIDERS[selected];
@@ -158,6 +188,36 @@ export const SettingsScreen = () => {
           )}
         </div>
       )}
+
+      <div className={styles.settingsCard}>
+        <div className={styles.settingsCardTitle}>Имя пользователя</div>
+        <div className={styles.settingsCardDesc}>
+          Отображается в сайдбаре и профиле. Сейчас: <b>{currentUser?.username || 'не задано'}</b>
+        </div>
+        <input
+          className={styles.settingsInput}
+          type="text"
+          maxLength={30}
+          value={usernameInput}
+          onChange={(e) => {
+            setUsernameInput(e.target.value);
+            setUsernameStatus(null);
+          }}
+          placeholder="Иван Петров"
+        />
+        <div className={styles.settingsActions}>
+          <button-element variant="primary" size="sm" onClick={handleUsernameSave}>
+            Сохранить имя
+          </button-element>
+        </div>
+        {usernameStatus && (
+          <div
+            className={`${styles.apiStatus} ${styles[`apiStatus${usernameStatus.type === 'success' ? 'Ok' : 'Error'}`]}`}
+          >
+            {usernameStatus.text}
+          </div>
+        )}
+      </div>
 
       <div className={`${styles.settingsCard} ${styles.settingsCardGreen}`}>
         <div className={`${styles.settingsCardTitle} ${styles.settingsCardTitleGreen}`}>

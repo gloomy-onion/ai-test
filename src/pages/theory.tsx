@@ -4,13 +4,12 @@ import { TheoryScreen } from '@/pages-fsd/testcraft/components/screens/theory';
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface TheoryPageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function TheoryPage({ authUser }: TheoryPageProps) {
+export default function TheoryPage() {
   return (
-    <AppLayout title="База знаний" subtitle="Теория и AI-консультант" authUser={authUser}>
+    <AppLayout title="База знаний" subtitle="Теория и AI-консультант">
       <TheoryScreen />
     </AppLayout>
   );

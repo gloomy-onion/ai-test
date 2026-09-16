@@ -10,11 +10,10 @@ import styles from './styles.module.scss';
 interface AppLayoutProps {
   title?: string;
   subtitle?: string;
-  authUser: string;
   children: ReactNode;
 }
 
-export const AppLayout = ({ title, subtitle, authUser, children }: AppLayoutProps) => {
+export const AppLayout = ({ title, subtitle, children }: AppLayoutProps) => {
   const queryClient = useQueryClient();
   useQuery(historyOptions());
   const { data: provider } = useQuery(settingsOptions());
@@ -33,7 +32,7 @@ export const AppLayout = ({ title, subtitle, authUser, children }: AppLayoutProp
 
   return (
     <div className={styles.app} data-theme="dark">
-      <Sidebar authUser={authUser} />
+      <Sidebar />
       <div className={styles.main}>
         {Boolean(title || subtitle) && <Header title={title || ''} subtitle={subtitle || ''} />}
         <div className={styles.content}>{children}</div>

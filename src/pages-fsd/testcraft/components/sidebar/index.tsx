@@ -5,17 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import { NAV_ITEMS, FILTER_ITEMS } from '@/shared/lib/config';
-import { historyOptions } from '@/shared/api';
+import { historyOptions, userOptions } from '@/shared/api';
 import { getRemainingTasks } from '@/shared/lib/helpers/tasks-data';
 import { getUserInitials } from '@/shared/lib/helpers/user';
 import { getNetworkInfo, subscribeToNetwork } from '@/shared/lib/helpers/network';
 import { getTotalXP, getLevelInfo } from '@/shared/lib/helpers/xp-system';
 import { createBrowserSupabase } from '@/shared/lib/supabase';
 import styles from './styles.module.scss';
-
-interface SidebarProps {
-  authUser: string;
-}
 
 const TASK_FILTER_ROUTES: Record<string, string> = {
   functional: '/tasks?filter=functional',
@@ -33,9 +29,11 @@ const ACTIVE_SCREEN_MAP: Record<string, string> = {
   '/settings': 'settings',
 };
 
-export const Sidebar = ({ authUser }: SidebarProps) => {
+export const Sidebar = () => {
   const router = useRouter();
   const { data: history = [] } = useQuery(historyOptions());
+  const { data: user } = useQuery(userOptions());
+  const displayName = user?.username || user?.email || '';
   const xp = getTotalXP(history);
   const level = getLevelInfo(xp);
 
@@ -107,9 +105,9 @@ export const Sidebar = ({ authUser }: SidebarProps) => {
       </div>
 
       <div className={styles.sidebarUser}>
-        <div className={styles.userAvatar}>{getUserInitials(authUser)}</div>
+        <div className={styles.userAvatar}>{getUserInitials(displayName)}</div>
         <div className={styles.userInfo}>
-          <div className={styles.userName}>{authUser}</div>
+          <div className={styles.userName}>{displayName}</div>
           <div className={styles.userLevel}>
             Уровень {level.level} · {xp} XP
           </div>

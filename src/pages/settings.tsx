@@ -4,13 +4,12 @@ import { SettingsScreen } from '@/pages-fsd/testcraft/components/screens/setting
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface SettingsPageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function SettingsPage({ authUser }: SettingsPageProps) {
+export default function SettingsPage() {
   return (
-    <AppLayout title="Настройки API" subtitle="Провайдер и ключ для проверки заданий" authUser={authUser}>
+    <AppLayout title="Настройки API" subtitle="Провайдер и ключ для проверки заданий">
       <SettingsScreen />
     </AppLayout>
   );

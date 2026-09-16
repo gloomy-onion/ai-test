@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { historyApi, historyOptions, HISTORY_QUERY_KEY } from '@/shared/api';
+import { historyApi, historyOptions, HISTORY_QUERY_KEY, userOptions } from '@/shared/api';
 import { TASKS } from '@/shared/lib/helpers/tasks-data';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
 import { getTotalXP, getLevelInfo, getCategoryProgress, getCategoryLevelInfo, getStreakInfo, getCategoryCompletionBonus } from '@/shared/lib/helpers/xp-system';
@@ -17,6 +17,9 @@ export const ProfileScreen = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { data: history = [] } = useQuery(historyOptions());
+  const { data: user } = useQuery(userOptions());
+  const displayName = user?.username || 'QA-студент';
+  const displayEmail = user?.email || '';
 
   const clearMutation = useMutation({
     mutationFn: () => historyApi.clear(),
@@ -47,9 +50,10 @@ export const ProfileScreen = () => {
   return (
     <div className={styles.profileContainer}>
       <div className={styles.profileHeader}>
-        <div className={styles.profileAvatar}>QA</div>
+        <div className={styles.profileAvatar}>{displayName.charAt(0).toUpperCase()}</div>
         <div>
-          <div className={styles.profileName}>Junior Tester</div>
+          <div className={styles.profileName}>{displayName}</div>
+          {displayEmail && <div className={styles.profileEmail}>{displayEmail}</div>}
           <div className={styles.profileLevel}>
             Уровень {lvl.level} — {lvl.title}
           </div>

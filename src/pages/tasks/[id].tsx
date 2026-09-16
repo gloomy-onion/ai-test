@@ -4,13 +4,12 @@ import { WorkspaceScreen } from '@/pages-fsd/testcraft/components/screens/worksp
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface WorkspacePageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function WorkspacePage({ authUser }: WorkspacePageProps) {
+export default function WorkspacePage() {
   return (
-    <AppLayout authUser={authUser}>
+    <AppLayout>
       <WorkspaceScreen />
     </AppLayout>
   );

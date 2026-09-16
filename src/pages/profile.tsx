@@ -4,13 +4,12 @@ import { ProfileScreen } from '@/pages-fsd/testcraft/components/screens/profile'
 import { withAuth } from '@/shared/lib/helpers/with-auth';
 
 interface ProfilePageProps {
-  authUser: string;
   dehydratedState: DehydratedState;
 }
 
-export default function ProfilePage({ authUser }: ProfilePageProps) {
+export default function ProfilePage() {
   return (
-    <AppLayout title="Профиль" subtitle="Ваш прогресс и достижения" authUser={authUser}>
+    <AppLayout title="Профиль" subtitle="Ваш прогресс и достижения">
       <ProfileScreen />
     </AppLayout>
   );
