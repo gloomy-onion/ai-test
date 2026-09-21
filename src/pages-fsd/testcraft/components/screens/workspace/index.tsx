@@ -48,13 +48,18 @@ export const WorkspaceScreen = () => {
   const prevBest = getBestScore(history, taskId);
   const isRetry = attempt > 1;
 
-  const { data: draftBody } = useQuery(draftOptions(taskId));
-  const saveDraftMutation = useMutation({
+  const { data: draftBody, isPending: isDraftPending } = useQuery(draftOptions(taskId));
+  const { mutate: saveDraft } = useMutation({
     mutationFn: ({ taskId: tid, body }: { taskId: number; body: string }) => draftApi.save(tid, body),
   });
 
+  const answerRef = useRef(answer);
   useEffect(() => {
-    if (!task) {
+    answerRef.current = answer;
+  }, [answer]);
+
+  useEffect(() => {
+    if (!task || isDraftPending) {
       return;
     }
 
@@ -76,7 +81,7 @@ export const WorkspaceScreen = () => {
     if (draftBody !== null && draftBody !== undefined && draftBody !== task.template) {
       showToast('Загружен сохранённый черновик');
     }
-  }, [task, draftBody]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [task, draftBody, isDraftPending]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!task) {
@@ -84,11 +89,11 @@ export const WorkspaceScreen = () => {
     }
 
     const interval = setInterval(() => {
-      saveDraftMutation.mutate({ taskId: task.id, body: answer });
+      saveDraft({ taskId: task.id, body: answerRef.current });
     }, 10000);
 
     return () => clearInterval(interval);
-  }, [task, answer, saveDraftMutation]);
+  }, [task, saveDraft]);
 
   const chars = answer.length;
   const lines = answer.split('\n').length;
@@ -212,7 +217,7 @@ export const WorkspaceScreen = () => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (task) {
-          saveDraftMutation.mutate({ taskId: task.id, body: answer });
+          saveDraft({ taskId: task.id, body: answer });
           showToast('Черновик сохранён ✓');
         }
       }
@@ -220,7 +225,7 @@ export const WorkspaceScreen = () => {
     document.addEventListener('keydown', handler);
 
     return () => document.removeEventListener('keydown', handler);
-  }, [task, answer, loading, handleSubmit, saveDraftMutation]);
+  }, [task, answer, loading, handleSubmit, saveDraft]);
 
   if (!task) {
     return <div className={styles.emptyState}>Задание не найдено</div>;

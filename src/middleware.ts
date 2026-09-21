@@ -17,12 +17,13 @@ function buildCspHeader(nonce: string): string {
 
   const styleSrc = isDev
     ? "'self' 'unsafe-inline' https://fonts.googleapis.com"
-    : "'self' https://fonts.googleapis.com";
+    : `'self' 'nonce-${nonce}' https://fonts.googleapis.com`;
 
   return [
     "default-src 'self'",
     `script-src ${scriptSrc}`,
     `style-src ${styleSrc}`,
+    "style-src-attr 'unsafe-inline'",
     "img-src 'self' blob: data: https://www.googletagmanager.com https://www.google-analytics.com",
     "font-src 'self' https://fonts.gstatic.com",
     [
