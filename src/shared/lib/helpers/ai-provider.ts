@@ -170,14 +170,45 @@ export const callClaude = async (prompt: string): Promise<FeedbackResult> => {
       ? data.content.map((c: { text?: string }) => c.text || '').join('')
       : data.choices?.[0]?.message?.content || '';
 
-  let clean = text.replaceAll(/```json|```/g, '').trim();
+  return parseAiJson(text);
+};
+
+const parseAiJson = (input: string): FeedbackResult => {
+  let clean = String(input).replaceAll(/```(?:json)?|```/g, '').trim();
   const s = clean.indexOf('{');
   const e = clean.lastIndexOf('}');
   if (s !== -1 && e !== -1) {
     clean = clean.slice(s, e + 1);
   }
 
-  return JSON.parse(clean);
+  const candidates = [
+    clean,
+    clean.replaceAll(/,\s*([}\]])/g, '$1'),
+    clean
+      .replaceAll(/,\s*([}\]])/g, '$1')
+      .replaceAll(/[\r\n\t]+/g, ' '),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate) as Partial<FeedbackResult>;
+      if (
+        typeof parsed.score === 'number' &&
+        typeof parsed.coverage === 'number' &&
+        typeof parsed.quality === 'number' &&
+        typeof parsed.summary === 'string' &&
+        Array.isArray(parsed.good) &&
+        Array.isArray(parsed.missing) &&
+        Array.isArray(parsed.tips)
+      ) {
+        return parsed as FeedbackResult;
+      }
+    } catch {
+      // попробовать следующий вариант очистки
+    }
+  }
+
+  throw new Error('AI вернул некорректный JSON. Попробуйте ещё раз или уменьшите ответ.');
 };
 
 export const testApiConnection = async (
