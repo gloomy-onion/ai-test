@@ -35,6 +35,7 @@ export const WorkspaceScreen = () => {
   const [hintText, setHintText] = useState('');
   const [hintLoading, setHintLoading] = useState(false);
   const [idealAnswer, setIdealAnswer] = useState('');
+  const [idealAnswerError, setIdealAnswerError] = useState('');
   const [showIdealAnswer, setShowIdealAnswer] = useState(false);
   const [idealAnswerLoading, setIdealAnswerLoading] = useState(false);
   const [earnedXP, setEarnedXP] = useState(0);
@@ -49,14 +50,42 @@ export const WorkspaceScreen = () => {
   const isRetry = attempt > 1;
 
   const { data: draftBody, isPending: isDraftPending } = useQuery(draftOptions(taskId));
-  const { mutate: saveDraft } = useMutation({
+  const { mutateAsync: saveDraft } = useMutation({
     mutationFn: ({ taskId: tid, body }: { taskId: number; body: string }) => draftApi.save(tid, body),
   });
 
   const answerRef = useRef(answer);
+  const dirtyRef = useRef(false);
+  const savingRef = useRef(false);
+
   useEffect(() => {
     answerRef.current = answer;
+    dirtyRef.current = true;
   }, [answer]);
+
+  const flushSave = useCallback(
+    async (opts?: { force?: boolean }) => {
+      const id = task?.id;
+      if (!id) return false;
+      if (!opts?.force && !dirtyRef.current) return false;
+      if (savingRef.current) return false;
+
+      savingRef.current = true;
+      dirtyRef.current = false;
+      const body = answerRef.current;
+
+      try {
+        await saveDraft({ taskId: id, body });
+        return true;
+      } catch {
+        dirtyRef.current = true;
+        return false;
+      } finally {
+        savingRef.current = false;
+      }
+    },
+    [task, saveDraft],
+  );
 
   useEffect(() => {
     if (!task || isDraftPending) {
@@ -73,6 +102,7 @@ export const WorkspaceScreen = () => {
     setError('');
     setHintText('');
     setIdealAnswer('');
+    setIdealAnswerError('');
     setShowIdealAnswer(false);
     setSelfScore(0);
     setShowSelfAssess(false);
@@ -84,16 +114,39 @@ export const WorkspaceScreen = () => {
   }, [task, draftBody, isDraftPending]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!task) {
-      return;
-    }
+    if (!task) return;
 
-    const interval = setInterval(() => {
-      saveDraft({ taskId: task.id, body: answerRef.current });
-    }, 10000);
+    let interval: ReturnType<typeof setInterval> | null = null;
 
-    return () => clearInterval(interval);
-  }, [task, saveDraft]);
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(() => void flushSave(), 10000);
+    };
+    const stop = () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stop();
+        void flushSave();
+      } else {
+        start();
+      }
+    };
+
+    if (!document.hidden) start();
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', handleVisibility);
+      void flushSave();
+    };
+  }, [task, flushSave]);
 
   const chars = answer.length;
   const lines = answer.split('\n').length;
@@ -172,7 +225,7 @@ export const WorkspaceScreen = () => {
   }, [task, answer]);
 
   const handleIdealAnswer = useCallback(async () => {
-    if (!task) {
+    if (!task || idealAnswerLoading) {
       return;
     }
     if (idealAnswer) {
@@ -180,16 +233,17 @@ export const WorkspaceScreen = () => {
       return;
     }
     setIdealAnswerLoading(true);
+    setIdealAnswerError('');
     try {
       const text = await getIdealAnswer(task);
       setIdealAnswer(text);
       setShowIdealAnswer(true);
     } catch {
-      setIdealAnswer('Не удалось получить эталонный ответ.');
+      setIdealAnswerError('Не удалось получить эталонный ответ.');
       setShowIdealAnswer(true);
     }
     setIdealAnswerLoading(false);
-  }, [task, idealAnswer]);
+  }, [task, idealAnswer, idealAnswerLoading]);
 
   const handleCopy = () => {
     writeClipboard(idealAnswer).then(
@@ -217,15 +271,16 @@ export const WorkspaceScreen = () => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (task) {
-          saveDraft({ taskId: task.id, body: answer });
-          showToast('Черновик сохранён ✓');
+          flushSave({ force: true }).then((saved) => {
+            if (saved) showToast('Черновик сохранён ✓');
+          });
         }
       }
     };
     document.addEventListener('keydown', handler);
 
     return () => document.removeEventListener('keydown', handler);
-  }, [task, answer, loading, handleSubmit, saveDraft]);
+  }, [task, loading, handleSubmit, flushSave]);
 
   if (!task) {
     return <div className={styles.emptyState}>Задание не найдено</div>;
@@ -376,7 +431,7 @@ export const WorkspaceScreen = () => {
             </div>
           )}
 
-          {showIdealAnswer && idealAnswer && (
+          {showIdealAnswer && (idealAnswer || idealAnswerError) && (
             <div className={styles.idealAnswerPanel}>
               <div className={styles.idealAnswerHeader}>
                 <span>★ Эталонный ответ</span>
@@ -408,10 +463,16 @@ export const WorkspaceScreen = () => {
                   </button-element>
                 </div>
               </div>
-              <markdown-renderer
-                class={styles.idealAnswerBody}
-                text={idealAnswer}
-              ></markdown-renderer>
+              {idealAnswerError ? (
+                <div className={styles.feedbackText} style={{ color: 'var(--danger)' }}>
+                  {idealAnswerError}
+                </div>
+              ) : (
+                <markdown-renderer
+                  class={styles.idealAnswerBody}
+                  text={idealAnswer}
+                ></markdown-renderer>
+              )}
             </div>
           )}
 
