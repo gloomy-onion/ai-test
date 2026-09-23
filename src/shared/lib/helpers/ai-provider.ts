@@ -119,35 +119,31 @@ ${answer}
 }`;
 };
 
-export const callClaude = async (prompt: string): Promise<FeedbackResult> => {
-  const provId = getProvider();
-  const prov = PROVIDERS[provId];
-  const key = getApiKey();
+const buildHeaders = (provId: string, key: string): Record<string, string> => {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-
-  let body: string;
   if (provId === 'claude') {
     if (key) {
       headers['x-api-key'] = key;
     }
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }],
-    });
   } else {
     if (!key) {
       throw new Error('Добавьте API-ключ в Настройках API');
     }
     headers.Authorization = `Bearer ${key}`;
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }],
-    });
   }
+  return headers;
+};
 
-  const response = await fetch(prov.url, { method: 'POST', headers, body });
+const requestChatCompletion = async (
+  provId: string,
+  url: string,
+  body: string,
+): Promise<string> => {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: buildHeaders(provId, getApiKey()),
+    body,
+  });
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
@@ -165,11 +161,23 @@ export const callClaude = async (prompt: string): Promise<FeedbackResult> => {
   }
 
   const data = await response.json();
-  const text: string =
-    provId === 'claude'
-      ? data.content.map((c: { text?: string }) => c.text || '').join('')
-      : data.choices?.[0]?.message?.content || '';
+  return (provId === 'claude'
+    ? data.content.map((c: { text?: string }) => c.text || '').join('')
+    : data.choices?.[0]?.message?.content || ''
+  ).trim();
+};
 
+export const callClaude = async (prompt: string): Promise<FeedbackResult> => {
+  const provId = getProvider();
+  const prov = PROVIDERS[provId];
+
+  const body = JSON.stringify({
+    model: prov.model,
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const text = await requestChatCompletion(provId, prov.url, body);
   return parseAiJson(text);
 };
 
@@ -217,28 +225,23 @@ export const testApiConnection = async (
 ): Promise<{ ok: boolean; message: string }> => {
   const prov = PROVIDERS[provider];
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  let body: string;
 
   if (provider === 'claude') {
     if (key) {
       headers['x-api-key'] = key;
     }
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 10,
-      messages: [{ role: 'user', content: 'Hi' }],
-    });
   } else {
     if (!key) {
       return { ok: false, message: 'Введите API-ключ' };
     }
     headers.Authorization = `Bearer ${key}`;
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 10,
-      messages: [{ role: 'user', content: 'Hi' }],
-    });
   }
+
+  const body = JSON.stringify({
+    model: prov.model,
+    max_tokens: 10,
+    messages: [{ role: 'user', content: 'Hi' }],
+  });
 
   try {
     const res = await fetch(prov.url, { method: 'POST', headers, body });
@@ -287,128 +290,38 @@ export const askTheoryQuestion = async (q: string): Promise<string> => {
 export const getHint = async (task: Task, answer: string): Promise<string> => {
   const provId = getProvider();
   const prov = PROVIDERS[provId];
-  const key = getApiKey();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
   const prompt = `Задание: ${task.desc}\nТип документа: ${task.docLabel}\nТребования: ${task.requirement}\n\nТекущий ответ студента:\n${answer || '(пусто)'}\n\nДай краткую подсказку (не решение!): что стоит добавить или проверить? 3-4 предложения на русском.`;
 
-  let body: string;
-  if (provId === 'claude') {
-    if (key) {
-      headers['x-api-key'] = key;
-    }
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 500,
-      messages: [{ role: 'user', content: prompt }],
-    });
-  } else {
-    if (!key) {
-      throw new Error('Добавьте API-ключ в Настройках API');
-    }
-    headers.Authorization = `Bearer ${key}`;
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 500,
-      messages: [{ role: 'user', content: prompt }],
-    });
-  }
+  const body = JSON.stringify({
+    model: prov.model,
+    max_tokens: 500,
+    messages: [{ role: 'user', content: prompt }],
+  });
 
-  const response = await fetch(prov.url, { method: 'POST', headers, body });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    const msg =
-      (err as { error?: { message?: string }; message?: string })?.error?.message ||
-      (err as { message?: string })?.message ||
-      response.status;
-    if (response.status === 401) {
-      throw new Error('Неверный API-ключ. Проверьте Настройки API.');
-    }
-    if (response.status === 429) {
-      throw new Error('Превышен лимит запросов. Попробуйте позже.');
-    }
-    throw new Error(`Ошибка API: ${msg}`);
-  }
-
-  const data = await response.json();
-  return (provId === 'claude'
-    ? data.content.map((c: { text?: string }) => c.text || '').join('')
-    : data.choices?.[0]?.message?.content || ''
-  ).trim();
+  return requestChatCompletion(provId, prov.url, body);
 };
 
 export const getIdealAnswer = async (task: Task): Promise<string> => {
   const provId = getProvider();
   const prov = PROVIDERS[provId];
-  const key = getApiKey();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
 
-  let body: string;
-  if (provId === 'claude') {
-    if (key) {
-      headers['x-api-key'] = key;
-    }
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 2000,
-      messages: [
-        {
-          role: 'user',
-          content: `Ты опытный QA-наставник. Покажи эталонный/идеальный ответ на задание для начинающего тестировщика.
+  const prompt = `Ты опытный QA-наставник. Покажи эталонный/идеальный ответ на задание для начинающего тестировщика.
 
 ЗАДАНИЕ:
 Тип документа: ${task.docLabel}
 Описание: ${task.desc}
 Требования к системе: ${task.requirement}
 
-Напиши полный, подробный, правильно оформленный эталонный ответ. Используй подходящий формат (чек-лист, тест-кейсы, баг-репорт). Отвечай на русском языке. Не добавляй комментариев и пояснений — только сам эталонный ответ.`,
-        },
-      ],
-    });
-  } else {
-    if (!key) {
-      throw new Error('Добавьте API-ключ в Настройках API');
-    }
-    headers.Authorization = `Bearer ${key}`;
-    body = JSON.stringify({
-      model: prov.model,
-      max_tokens: 2000,
-      messages: [{ role: 'user', content: `Ты опытный QA-наставник. Покажи эталонный/идеальный ответ на задание для начинающего тестировщика.
+Напиши полный, подробный, правильно оформленный эталонный ответ. Используй подходящий формат (чек-лист, тест-кейсы, баг-репорт). Отвечай на русском языке. Не добавляй комментариев и пояснений — только сам эталонный ответ.`;
 
-ЗАДАНИЕ:
-Тип документа: ${task.docLabel}
-Описание: ${task.desc}
-Требования к системе: ${task.requirement}
+  const body = JSON.stringify({
+    model: prov.model,
+    max_tokens: 2000,
+    messages: [{ role: 'user', content: prompt }],
+  });
 
-Напиши полный, подробный, правильно оформленный эталонный ответ. Используй подходящий формат (чек-лист, тест-кейсы, баг-репорт). Отвечай на русском языке. Не добавляй комментариев и пояснений — только сам эталонный ответ.` }],
-    });
-  }
-
-  const response = await fetch(prov.url, { method: 'POST', headers, body });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    const msg =
-      (err as { error?: { message?: string }; message?: string })?.error?.message ||
-      (err as { message?: string })?.message ||
-      response.status;
-    if (response.status === 401) {
-      throw new Error('Неверный API-ключ. Проверьте Настройки API.');
-    }
-    if (response.status === 429) {
-      throw new Error('Превышен лимит запросов. Попробуйте позже.');
-    }
-    throw new Error(`Ошибка API: ${msg}`);
-  }
-
-  const data = await response.json();
-  const text: string =
-    provId === 'claude'
-      ? data.content.map((c: { text?: string }) => c.text || '').join('')
-      : data.choices?.[0]?.message?.content || '';
-
-  return text.trim();
+  return requestChatCompletion(provId, prov.url, body);
 };
 
 export const scoreColor = (n: number): string => {
