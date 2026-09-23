@@ -134,11 +134,11 @@ const buildHeaders = (provId: string, key: string): Record<string, string> => {
   return headers;
 };
 
-const requestChatCompletion = async (
+const fetchChatCompletion = async (
   provId: string,
   url: string,
   body: string,
-): Promise<string> => {
+): Promise<Response> => {
   const response = await fetch(url, {
     method: 'POST',
     headers: buildHeaders(provId, getApiKey()),
@@ -160,6 +160,15 @@ const requestChatCompletion = async (
     throw new Error(`Ошибка API: ${msg}`);
   }
 
+  return response;
+};
+
+const requestChatCompletion = async (
+  provId: string,
+  url: string,
+  body: string,
+): Promise<string> => {
+  const response = await fetchChatCompletion(provId, url, body);
   const data = await response.json();
   return (provId === 'claude'
     ? data.content.map((c: { text?: string }) => c.text || '').join('')
@@ -287,7 +296,24 @@ export const askTheoryQuestion = async (q: string): Promise<string> => {
     .trim();
 };
 
-export const getHint = async (task: Task, answer: string): Promise<string> => {
+const parseSseDelta = (parsed: Record<string, unknown>, provId: string): string => {
+  if (provId === 'claude') {
+    const delta = parsed.delta as { text?: string } | undefined;
+    if (parsed.type === 'content_block_delta' && delta?.text) {
+      return delta.text;
+    }
+    return '';
+  }
+
+  const choices = parsed.choices as Array<{ delta?: { content?: string } }> | undefined;
+  return choices?.[0]?.delta?.content || '';
+};
+
+export const getHint = async (
+  task: Task,
+  answer: string,
+  onChunk?: (text: string) => void,
+): Promise<string> => {
   const provId = getProvider();
   const prov = PROVIDERS[provId];
 
@@ -297,9 +323,59 @@ export const getHint = async (task: Task, answer: string): Promise<string> => {
     model: prov.model,
     max_tokens: 500,
     messages: [{ role: 'user', content: prompt }],
+    ...(onChunk ? { stream: true } : {}),
   });
 
-  return requestChatCompletion(provId, prov.url, body);
+  if (!onChunk) {
+    return requestChatCompletion(provId, prov.url, body);
+  }
+
+  const response = await fetchChatCompletion(provId, prov.url, body);
+  if (!response.body) {
+    return requestChatCompletion(provId, prov.url, body);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+  let result = '';
+  let done = false;
+
+  while (!done) {
+    const { value, done: streamDone } = await reader.read();
+    done = streamDone;
+
+    if (value) {
+      buffer += decoder.decode(value, { stream: !done });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const cleanedLine = line.trim();
+        if (!cleanedLine || cleanedLine === 'data: [DONE]') continue;
+
+        if (cleanedLine.startsWith('data: ')) {
+          const jsonStr = cleanedLine.replace(/^data:\s*/, '');
+          try {
+            const parsed = JSON.parse(jsonStr) as Record<string, unknown>;
+            const delta = parseSseDelta(parsed, provId);
+            if (delta) {
+              result += delta;
+              onChunk(delta);
+              // Даём браузеру кадр, чтобы каждый чанк отрендерился отдельно,
+              // а не был схлопнут React-батчингом.
+              await new Promise((resolve) => setTimeout(resolve, 0));
+            }
+          } catch {
+            // Неполные/служебные строки SSE
+          }
+        }
+      }
+    }
+  }
+
+  return result;
 };
 
 export const getIdealAnswer = async (task: Task): Promise<string> => {

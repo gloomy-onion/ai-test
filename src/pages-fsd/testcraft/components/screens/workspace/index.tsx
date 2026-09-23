@@ -214,15 +214,22 @@ export const WorkspaceScreen = () => {
     if (!task) {
       return;
     }
+
     setHintLoading(true);
+    setHintText('');
+
     try {
-      const text = await getHint(task, answer);
-      setHintText(text);
-    } catch {
+      await getHint(task, answer, (chunk) => {
+        setHintText((prev) => prev + chunk);
+      });
+    } catch (error) {
       setHintText('Не удалось получить подсказку.');
+      console.error(error);
+    } finally {
+      setHintLoading(false);
     }
-    setHintLoading(false);
   }, [task, answer]);
+
 
   const handleIdealAnswer = useCallback(async () => {
     if (!task || idealAnswerLoading) {
