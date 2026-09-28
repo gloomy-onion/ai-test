@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 function generateNonce(): string {
   const array = crypto.getRandomValues(new Uint8Array(16));
+
   return btoa(String.fromCharCode(...array));
 }
 
@@ -10,6 +11,7 @@ function buildCspHeader(nonce: string): string {
   const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
     ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
     : '';
+  const supabaseWsOrigin = supabaseOrigin.replace(/^http/, 'ws');
 
   const scriptSrc = ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'", isDev && "'unsafe-eval'"]
     .filter(Boolean)
@@ -34,8 +36,11 @@ function buildCspHeader(nonce: string): string {
       'https://analytics.google.com',
       'https://www.googletagmanager.com',
       supabaseOrigin,
+      supabaseWsOrigin,
       ...(isDev ? ['ws://localhost:4000'] : []),
-    ].filter(Boolean).join(' '),
+    ]
+      .filter(Boolean)
+      .join(' '),
     'frame-src https://www.googletagmanager.com',
     "object-src 'none'",
     "base-uri 'self'",
