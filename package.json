@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "ws": "tsx ws-server/index.ts",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "prepare": "husky install"
@@ -22,7 +23,8 @@
     "next-auth": "5.0.0-beta.32",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "sass": "^1.99.0"
+    "sass": "^1.99.0",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.1.0",
@@ -35,6 +37,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/parser": "^8.57.2",
     "brace-expansion": "^2.1.1",
     "eslint": "^9.39.4",
@@ -48,12 +51,20 @@
     "eslint-plugin-unicorn": "^56.0.1",
     "husky": "^9.1.7",
     "prettier": "3.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "pnpm": {
     "overrides": {
       "brace-expansion": ">=2.0.3 <3.0.0 || >=5.0.6",
       "postcss": ">=8.5.10"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "ignoredBuiltDependencies": [
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }

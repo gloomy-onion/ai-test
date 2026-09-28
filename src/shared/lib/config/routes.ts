@@ -5,6 +5,7 @@ export const ROUTES = {
   tasks: '/tasks',
   history: '/history',
   theory: '/theory',
+  community: '/community',
   profile: '/profile',
   settings: '/settings',
 } as const;

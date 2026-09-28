@@ -34,6 +34,7 @@ function buildCspHeader(nonce: string): string {
       'https://analytics.google.com',
       'https://www.googletagmanager.com',
       supabaseOrigin,
+      ...(isDev ? ['ws://localhost:4000'] : []),
     ].filter(Boolean).join(' '),
     'frame-src https://www.googletagmanager.com',
     "object-src 'none'",

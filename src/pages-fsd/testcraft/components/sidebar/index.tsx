@@ -25,6 +25,7 @@ const ACTIVE_SCREEN_MAP: Record<string, string> = {
   '/tasks': 'tasks',
   '/history': 'history',
   '/theory': 'theory',
+  '/community': 'community',
   '/profile': 'profile',
   '/settings': 'settings',
 };

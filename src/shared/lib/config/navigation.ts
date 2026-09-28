@@ -14,6 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: 'tasks', label: 'Задания', href: '/tasks' },
   { id: 'history', label: 'История', href: '/history' },
   { id: 'theory', label: 'Теория', href: '/theory' },
+  { id: 'community', label: 'Сообщество', href: '/community' },
   { id: 'profile', label: 'Профиль', href: '/profile' },
   { id: 'settings', label: 'Настройки API', href: '/settings' },
 ];

@@ -89,10 +89,17 @@ export const SettingsScreen = () => {
     }
 
     try {
-      const { error } = await createBrowserSupabase().auth.updateUser({ data: { username: trimmed } });
+      const supabase = createBrowserSupabase();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { error } = await supabase.auth.updateUser({ data: { username: trimmed } });
       if (error) {
         setUsernameStatus({ type: 'error', text: error.message });
         return;
+      }
+      if (user) {
+        await supabase.from('profiles').upsert({ id: user.id, username: trimmed });
       }
       setUsernameStatus({ type: 'success', text: 'Имя сохранено ✓' });
       void queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY] });

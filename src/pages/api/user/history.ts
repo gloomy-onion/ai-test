@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createApiSupabase } from '@/shared/lib/supabase';
 import type { HistoryEntry } from '@/shared/lib/helpers/types';
+import { getTotalXP } from '@/shared/lib/helpers/xp-system';
 
 interface HistoryRow {
   task_id: number;
@@ -23,6 +24,26 @@ const toEntry = (row: HistoryRow): HistoryEntry => ({
   selfScore: row.self_score ?? undefined,
   prevBestScore: row.prev_best_score ?? undefined,
 });
+
+const refreshProfilesXp = async (
+  supabase: ReturnType<typeof createApiSupabase>,
+  userId: string,
+): Promise<void> => {
+  const { data } = await supabase
+    .from('history')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (!data) {
+    return;
+  }
+
+  const entries = (data as unknown as HistoryRow[]).map(toEntry);
+  const xp = getTotalXP(entries);
+
+  await supabase.from('profiles').upsert({ id: userId, xp }, { onConflict: 'id' });
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const supabase = createApiSupabase(req, res);
@@ -79,6 +100,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to save history' });
     }
 
+    await refreshProfilesXp(supabase, user.id);
+
     return res.status(200).json({ success: true });
   }
 
@@ -89,6 +112,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.error(error);
       return res.status(500).json({ error: 'Failed to clear history' });
     }
+
+    await refreshProfilesXp(supabase, user.id);
 
     return res.status(200).json({ success: true });
   }
