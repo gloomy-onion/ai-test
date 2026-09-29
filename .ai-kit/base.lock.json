@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "package": "base",
+  "version": "0.2.0",
+  "target": "opencode",
+  "sourceDigest": "26d882706bba4148079ffc1ec834c22ea5053ec7b1701cd8f212177c11e33493",
+  "files": {
+    ".opencode/skills/adr-documentation/SKILL.md": "927d8ca5058700af83b201e84717ca6dd0d0b295069da04259467fbb6a7500c6",
+    ".opencode/skills/meets-documentation/SKILL.md": "13e3df54f0af6c12a70e9d6cebb623700ba8780042f8c4c942a69147363e89ae",
+    ".opencode/skills/notes-documentation/SKILL.md": "22e85485442cd9ae98c7536de032dedcea1cb26e95942c35af8b05d6aca70642",
+    ".opencode/skills/refs-documentation/SKILL.md": "0ce3fb2c027fc5560e7b8277e8ec3fe769459b69f016971e6854e66c75f39b5a",
+    "docs/README.md": "a75953b1ce25147d1d46ba6e5fcda22d2db12386a6a0e61801052952a1366515",
+    "docs/adr/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/meets/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/notes/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/refs/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/refs/external/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "docs/refs/internal/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "blocks": {
+    "AGENTS.md": "ebffc64caeb8e3767ac673ad3856980feefddd64c5d65d2e6bd4b99bc05bddb5",
+    "docs/index.md": "6d537f73443870c65415401ecc756c09c54d23bd4ae3c4c0d2ba853852ef8c41"
+  }
+}
