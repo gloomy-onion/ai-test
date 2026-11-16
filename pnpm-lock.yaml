@@ -764,11 +764,11 @@ packages:
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
   '@rc-foundation/commitlint-rc@0.1.2':
-    resolution: {integrity: sha1-GvRMWiPRud663QgKUQlsMsxNtfo=, tarball: https://rdclr.gitlab.yandexcloud.net/api/v4/projects/168/packages/npm/@rc-foundation/commitlint-rc/-/@rc-foundation/commitlint-rc-0.1.2.tgz}
+    resolution: {integrity: sha1-GvRMWiPRud663QgKUQlsMsxNtfo=, tarball: https://git.rdclr.ru/api/v4/projects/168/packages/npm/@rc-foundation/commitlint-rc/-/@rc-foundation/commitlint-rc-0.1.2.tgz}
     engines: {node: '>=v14'}
 
   '@rc-foundation/eslint-config-rc@0.0.25':
-    resolution: {integrity: sha1-oz1cB23xueejY8y2ZsTgimrAcZw=, tarball: https://rdclr.gitlab.yandexcloud.net/api/v4/projects/169/packages/npm/@rc-foundation/eslint-config-rc/-/@rc-foundation/eslint-config-rc-0.0.25.tgz}
+    resolution: {integrity: sha1-oz1cB23xueejY8y2ZsTgimrAcZw=, tarball: https://git.rdclr.ru/api/v4/projects/169/packages/npm/@rc-foundation/eslint-config-rc/-/@rc-foundation/eslint-config-rc-0.0.25.tgz}
     peerDependencies:
       eslint-plugin-import: '>=2'
 
