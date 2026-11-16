@@ -173,10 +173,12 @@ export async function fetchGithubEmails(accessToken: string): Promise<string[]> 
 }
 
 export class OAuthError extends Error {
+  code: string;
   description?: string;
   constructor(code: string, description?: string) {
     super(code);
     this.name = 'OAuthError';
+    this.code = code;
     this.description = description;
   }
 }

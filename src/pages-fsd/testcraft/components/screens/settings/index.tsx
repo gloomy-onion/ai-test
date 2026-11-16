@@ -24,9 +24,30 @@ export const SettingsScreen = () => {
   const [status, setStatus] = useState<{ type: string; text: string } | null>(null);
   const [testing, setTesting] = useState(false);
   const popoverRef = useRef<HTMLElement | null>(null);
+  const [ghBusy, setGhBusy] = useState(false);
 
   const { data: selected = 'claude' } = useQuery(settingsOptions());
   const { data: currentUser } = useQuery(userOptions());
+  const { data: ghStatus, refetch: refetchGh } = useQuery({
+    queryKey: ['gh-connected'],
+    queryFn: async () => {
+      const res = await fetch('/api/auth/github/status');
+      return (await res.json()) as {
+        connected: boolean;
+        account?: { login: string; name: string | null; avatar_url: string; email: string | null; html_url: string; scope: string; connected_at: string };
+      };
+    },
+  });
+
+  const handleGhDisconnect = async () => {
+    setGhBusy(true);
+    try {
+      await fetch('/api/auth/github/disconnect', { method: 'POST' });
+      await refetchGh();
+    } finally {
+      setGhBusy(false);
+    }
+  };
 
   useEffect(() => {
     setKeyInput(getApiKey(selected));
@@ -222,6 +243,41 @@ export const SettingsScreen = () => {
             className={`${styles.apiStatus} ${styles[`apiStatus${usernameStatus.type === 'success' ? 'Ok' : 'Error'}`]}`}
           >
             {usernameStatus.text}
+          </div>
+        )}
+      </div>
+
+      <div className={styles.settingsCard}>
+        <div className={styles.settingsCardTitle}>Подключённый аккаунт GitHub</div>
+        <div className={styles.settingsCardDesc}>
+          OAuth 2.0 Authorization Code Flow + PKCE, реализован без сторонних SDK.
+        </div>
+        {ghStatus?.connected && ghStatus.account ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <img
+              src={ghStatus.account.avatar_url}
+              alt={ghStatus.account.login}
+              width={48}
+              height={48}
+              style={{ borderRadius: '50%' }}
+            />
+            <div>
+              <div>
+                <b>{ghStatus.account.name || ghStatus.account.login}</b> (@{ghStatus.account.login})
+              </div>
+              <div>
+                scopes: {ghStatus.account.scope} · подключён {new Date(ghStatus.account.connected_at).toLocaleDateString()}
+              </div>
+            </div>
+            <button-element size="sm" onClick={handleGhDisconnect} disabled={ghBusy}>
+              {ghBusy ? 'Отключаю...' : 'Отключить'}
+            </button-element>
+          </div>
+        ) : (
+          <div className={styles.settingsActions}>
+            <a href="/api/auth/github/start?next=%2Fsettings" style={{ textDecoration: 'none' }}>
+              <button-element variant="primary" size="sm">Connect GitHub</button-element>
+            </a>
           </div>
         )}
       </div>
